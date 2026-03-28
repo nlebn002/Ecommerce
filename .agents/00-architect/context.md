@@ -11,7 +11,13 @@ You have access to these shared files. Read and follow them:
 
 ## What Exists Before You
 
-Nothing. You are the first agent to run. You create the project skeleton that all other agents build upon.
+The repository already contains:
+
+- `Ecommerce.AppHost`
+- `Ecommerce.ServiceDefaults`
+- Git baseline files such as `.gitignore`
+
+Your job is to build around those existing projects, not replace them.
 
 ## What Comes After You
 
@@ -21,7 +27,7 @@ Nothing. You are the first agent to run. You create the project skeleton that al
 | Common | `Ecommerce.Common.csproj` referencing Contracts |
 | Basket / Order / Logistics | Four `.csproj` files each with correct references |
 | Gateway | `Ecommerce.Gateway.csproj` with YARP packages |
-| Aspire | `Ecommerce.AppHost.csproj` and `Ecommerce.ServiceDefaults.csproj` |
+| Aspire | Existing AppHost and ServiceDefaults wired to the new runnable projects |
 | Testing | Test projects referencing the correct service projects |
 | DevOps | Working compose, Dockerfiles, and CI assets |
 
