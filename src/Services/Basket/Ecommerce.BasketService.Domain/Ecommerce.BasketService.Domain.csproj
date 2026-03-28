@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.BasketService.Domain</AssemblyName>
+    <RootNamespace>Ecommerce.BasketService.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Contracts\Ecommerce.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Common\Ecommerce.Common.csproj" />
+  </ItemGroup>
+</Project>
+

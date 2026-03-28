@@ -11,8 +11,8 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <ProjectReference Include="..\..\Gateway\Ecommerce.Gateway\Ecommerce.Gateway.csproj" />
-    <ProjectReference Include="..\..\Services\Basket\Ecommerce.Basket.Api\Ecommerce.Basket.Api.csproj" />
-    <ProjectReference Include="..\..\Services\Order\Ecommerce.Order.Api\Ecommerce.Order.Api.csproj" />
-    <ProjectReference Include="..\..\Services\Logistics\Ecommerce.Logistics.Api\Ecommerce.Logistics.Api.csproj" />
+    <ProjectReference Include="..\..\Services\Basket\Ecommerce.BasketService.Api\Ecommerce.BasketService.Api.csproj" />
+    <ProjectReference Include="..\..\Services\Order\Ecommerce.OrderService.Api\Ecommerce.OrderService.Api.csproj" />
+    <ProjectReference Include="..\..\Services\Logistics\Ecommerce.LogisticsService.Api\Ecommerce.LogisticsService.Api.csproj" />
   </ItemGroup>
 </Project>

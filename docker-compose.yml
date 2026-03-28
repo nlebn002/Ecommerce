@@ -24,7 +24,7 @@ services:
   basket-api:
     build:
       context: .
-      dockerfile: src/Services/Basket/Ecommerce.Basket.Api/Dockerfile
+      dockerfile: src/Services/Basket/Ecommerce.BasketService.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
@@ -41,7 +41,7 @@ services:
   order-api:
     build:
       context: .
-      dockerfile: src/Services/Order/Ecommerce.Order.Api/Dockerfile
+      dockerfile: src/Services/Order/Ecommerce.OrderService.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
@@ -56,7 +56,7 @@ services:
   logistics-api:
     build:
       context: .
-      dockerfile: src/Services/Logistics/Ecommerce.Logistics.Api/Dockerfile
+      dockerfile: src/Services/Logistics/Ecommerce.LogisticsService.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080

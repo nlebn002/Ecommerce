@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.BasketService.Infrastructure</AssemblyName>
+    <RootNamespace>Ecommerce.BasketService.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.BasketService.Application\Ecommerce.BasketService.Application.csproj" />
+    <ProjectReference Include="..\Ecommerce.BasketService.Domain\Ecommerce.BasketService.Domain.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Contracts\Ecommerce.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+</Project>
+
