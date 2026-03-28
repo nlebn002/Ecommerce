@@ -56,6 +56,14 @@ public sealed class Basket : Entity
     public void Checkout()
     {
         Status = BasketStatus.CheckedOut;
+        RaiseDomainEvent(new BasketCheckedOutDomainEvent(
+            Id,
+            CustomerId,
+            Items
+                .Where(item => !item.IsDeleted)
+                .Select(item => new BasketCheckedOutItem(item.ProductId, item.ProductName, item.Quantity, item.UnitPrice))
+                .ToArray(),
+            Total));
     }
 
     private void RecalculateTotal()

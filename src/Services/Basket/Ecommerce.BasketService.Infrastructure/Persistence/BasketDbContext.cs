@@ -7,9 +7,12 @@ namespace Ecommerce.BasketService.Infrastructure.Persistence;
 
 public sealed class BasketDbContext : DbContext, IBasketDbContext
 {
-    public BasketDbContext(DbContextOptions<BasketDbContext> options)
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
+
+    public BasketDbContext(DbContextOptions<BasketDbContext> options, IDomainEventDispatcher domainEventDispatcher)
         : base(options)
     {
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public DbSet<Basket> Baskets => Set<Basket>();
@@ -25,9 +28,30 @@ public sealed class BasketDbContext : DbContext, IBasketDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var entitiesWithDomainEvents = ChangeTracker.Entries<Entity>()
+            .Select(entry => entry.Entity)
+            .Where(entity => entity.DomainEvents.Count > 0)
+            .ToArray();
+
         try
         {
-            return await base.SaveChangesAsync(cancellationToken);
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            var domainEvents = entitiesWithDomainEvents
+                .SelectMany(entity => entity.DomainEvents)
+                .ToArray();
+
+            if (domainEvents.Length > 0)
+            {
+                await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+
+                foreach (var entity in entitiesWithDomainEvents)
+                {
+                    entity.ClearDomainEvents();
+                }
+            }
+
+            return result;
         }
         catch (DbUpdateConcurrencyException)
         {

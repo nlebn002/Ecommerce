@@ -1,7 +1,7 @@
 using Ecommerce.BasketService.Application;
-using Ecommerce.BasketService.Infrastructure.Messaging;
 using Ecommerce.BasketService.Infrastructure.Persistence;
 using Ecommerce.BasketService.Infrastructure.Persistence.Interceptors;
+using Ecommerce.BasketService.Infrastructure.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
             });
         });
 
-        services.AddScoped<IBasketCheckoutPublisher, BasketCheckoutPublisher>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         return services;
     }

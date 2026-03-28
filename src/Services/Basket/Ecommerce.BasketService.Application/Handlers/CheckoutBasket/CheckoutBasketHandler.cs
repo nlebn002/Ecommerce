@@ -3,12 +3,10 @@ namespace Ecommerce.BasketService.Application;
 public sealed class CheckoutBasketHandler
 {
     private readonly IBasketDbContext _dbContext;
-    private readonly IBasketCheckoutPublisher _basketCheckoutPublisher;
 
-    public CheckoutBasketHandler(IBasketDbContext dbContext, IBasketCheckoutPublisher basketCheckoutPublisher)
+    public CheckoutBasketHandler(IBasketDbContext dbContext)
     {
         _dbContext = dbContext;
-        _basketCheckoutPublisher = basketCheckoutPublisher;
     }
 
     public async Task<BasketDto> ExecuteAsync(CheckoutBasketCommand command, CancellationToken cancellationToken)
@@ -31,7 +29,6 @@ public sealed class CheckoutBasketHandler
 
         basket.Checkout();
         await _dbContext.SaveChangesAsync(cancellationToken);
-        await _basketCheckoutPublisher.PublishAsync(basket, cancellationToken);
 
         return basket.ToDto();
     }
