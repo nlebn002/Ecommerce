@@ -1,4 +1,38 @@
 <Solution>
-  <Project Path="Ecommerce.AppHost/Ecommerce.AppHost.csproj" />
-  <Project Path="Ecommerce.ServiceDefaults/Ecommerce.ServiceDefaults.csproj" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/Gateway/Ecommerce.Gateway/Ecommerce.Gateway.csproj" />
+  </Folder>
+  <Folder Name="/src/Orchestration/">
+    <Project Path="src/Orchestration/Ecommerce.AppHost/Ecommerce.AppHost.csproj" />
+    <Project Path="src/Orchestration/Ecommerce.ServiceDefaults/Ecommerce.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Basket/">
+    <Project Path="src/Services/Basket/Ecommerce.Basket.Api/Ecommerce.Basket.Api.csproj" />
+    <Project Path="src/Services/Basket/Ecommerce.Basket.Application/Ecommerce.Basket.Application.csproj" />
+    <Project Path="src/Services/Basket/Ecommerce.Basket.Domain/Ecommerce.Basket.Domain.csproj" />
+    <Project Path="src/Services/Basket/Ecommerce.Basket.Infrastructure/Ecommerce.Basket.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Logistics/">
+    <Project Path="src/Services/Logistics/Ecommerce.Logistics.Api/Ecommerce.Logistics.Api.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.Logistics.Application/Ecommerce.Logistics.Application.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.Logistics.Domain/Ecommerce.Logistics.Domain.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.Logistics.Infrastructure/Ecommerce.Logistics.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Order/">
+    <Project Path="src/Services/Order/Ecommerce.Order.Api/Ecommerce.Order.Api.csproj" />
+    <Project Path="src/Services/Order/Ecommerce.Order.Application/Ecommerce.Order.Application.csproj" />
+    <Project Path="src/Services/Order/Ecommerce.Order.Domain/Ecommerce.Order.Domain.csproj" />
+    <Project Path="src/Services/Order/Ecommerce.Order.Infrastructure/Ecommerce.Order.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/SharedKernel/">
+    <Project Path="src/SharedKernel/Ecommerce.Common/Ecommerce.Common.csproj" />
+    <Project Path="src/SharedKernel/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
+  </Folder>
 </Solution>

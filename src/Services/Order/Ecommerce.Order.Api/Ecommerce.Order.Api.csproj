@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.Order.Api</AssemblyName>
+    <RootNamespace>Ecommerce.Order.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.Order.Application\Ecommerce.Order.Application.csproj" />
+    <ProjectReference Include="..\Ecommerce.Order.Infrastructure\Ecommerce.Order.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\Orchestration\Ecommerce.ServiceDefaults\Ecommerce.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+  </ItemGroup>
+</Project>

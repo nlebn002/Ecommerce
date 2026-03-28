@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.Contracts</AssemblyName>
+    <RootNamespace>Ecommerce.Contracts</RootNamespace>
+  </PropertyGroup>
+</Project>

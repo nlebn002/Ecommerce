@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.Logistics.Application</AssemblyName>
+    <RootNamespace>Ecommerce.Logistics.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ecommerce.Logistics.Domain\Ecommerce.Logistics.Domain.csproj" />
+  </ItemGroup>
+</Project>
