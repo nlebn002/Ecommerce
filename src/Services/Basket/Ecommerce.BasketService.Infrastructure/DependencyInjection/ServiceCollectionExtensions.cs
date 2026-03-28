@@ -17,6 +17,10 @@ public static class ServiceCollectionExtensions
             configuration.GetConnectionString("BasketDb")
             ?? throw new ArgumentNullException("Basket db connection string is null");
 
+        var messageBrokerConnectionString =
+            configuration.GetConnectionString("MessageBroker")
+            ?? throw new ArgumentNullException("Message broker connection string is null");
+
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<AuditSaveChangesInterceptor>();
         services.AddDbContext<BasketDbContext>((serviceProvider, options) =>
@@ -29,13 +33,7 @@ public static class ServiceCollectionExtensions
             bus.SetKebabCaseEndpointNameFormatter();
             bus.UsingRabbitMq((context, cfg) =>
             {
-                var host = configuration["MessageBroker:Host"] ?? "localhost";
-                cfg.Host(host, "/", hostConfiguration =>
-                {
-                    hostConfiguration.Username("guest");
-                    hostConfiguration.Password("guest");
-                });
-
+                cfg.Host(new Uri(messageBrokerConnectionString));
                 cfg.ConfigureEndpoints(context);
             });
         });

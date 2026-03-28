@@ -19,18 +19,6 @@
     <Project Path="src/Services/Basket/Ecommerce.BasketService.Domain/Ecommerce.BasketService.Domain.csproj" />
     <Project Path="src/Services/Basket/Ecommerce.BasketService.Infrastructure/Ecommerce.BasketService.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/src/Services/Logistics/">
-    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Api/Ecommerce.LogisticsService.Api.csproj" />
-    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Application/Ecommerce.LogisticsService.Application.csproj" />
-    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Domain/Ecommerce.LogisticsService.Domain.csproj" />
-    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Infrastructure/Ecommerce.LogisticsService.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/src/Services/Order/">
-    <Project Path="src/Services/Order/Ecommerce.OrderService.Api/Ecommerce.OrderService.Api.csproj" />
-    <Project Path="src/Services/Order/Ecommerce.OrderService.Application/Ecommerce.OrderService.Application.csproj" />
-    <Project Path="src/Services/Order/Ecommerce.OrderService.Domain/Ecommerce.OrderService.Domain.csproj" />
-    <Project Path="src/Services/Order/Ecommerce.OrderService.Infrastructure/Ecommerce.OrderService.Infrastructure.csproj" />
-  </Folder>
   <Folder Name="/src/SharedKernel/">
     <Project Path="src/SharedKernel/Ecommerce.Common/Ecommerce.Common.csproj" />
     <Project Path="src/SharedKernel/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
