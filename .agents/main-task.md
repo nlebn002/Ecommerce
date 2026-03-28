@@ -5,9 +5,9 @@ You are executing one repository agent.
   - .agents/shared/project-structure.md
   - .agents/shared/tech-stack.md
   - .agents/shared/coding-standards.md
-  - .agents/00-architect/system-prompt.md
-  - .agents/00-architect/context.md
-  - .agents/00-architect/tasks.md
+  - .agents/01-contracts/system-prompt.md
+  - .agents/01-contracts/context.md
+  - .agents/01-contracts/tasks.md
 
   Instructions:
   - Follow the shared files as the source of truth.
