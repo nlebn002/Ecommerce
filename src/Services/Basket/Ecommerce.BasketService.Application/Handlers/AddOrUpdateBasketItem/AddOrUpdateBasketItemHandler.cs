@@ -16,7 +16,7 @@ public sealed class AddOrUpdateBasketItemHandler
             throw BasketValidationException.For("quantity", "Quantity must be greater than zero.");
         }
 
-        var basket = await _dbContext.GetBasketAggregateByIdAsync(command.BasketId, cancellationToken);
+        var basket = await _dbContext.GetBasketByIdAsync(command.BasketId, cancellationToken);
         if (basket is null)
         {
             throw new BasketNotFoundException("The basket was not found.");

@@ -34,15 +34,7 @@ public sealed class Basket : Entity
         }
         else
         {
-            var deletedItem = Items.SingleOrDefault(item => item.ProductId == productId && item.IsDeleted);
-            if (deletedItem is null)
-            {
-                Items.Add(BasketItem.Create(Id, productId, productName, quantity, unitPrice));
-            }
-            else
-            {
-                deletedItem.Restore(quantity, productName, unitPrice);
-            }
+            Items.Add(BasketItem.Create(Id, productId, productName, quantity, unitPrice));
         }
 
         RecalculateTotal();

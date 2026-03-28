@@ -1,7 +1,6 @@
 using Ecommerce.BasketService.Api.Exceptions;
 using Ecommerce.BasketService.Application;
 using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

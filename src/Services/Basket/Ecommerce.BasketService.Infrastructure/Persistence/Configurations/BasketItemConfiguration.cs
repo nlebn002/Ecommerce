@@ -25,7 +25,5 @@ internal sealed class BasketItemConfiguration : IEntityTypeConfiguration<BasketI
         builder.Property(entity => entity.UnitPrice)
             .HasPrecision(18, 2);
 
-        builder.HasIndex(entity => new { entity.BasketId, entity.ProductId })
-            .IsUnique();
     }
 }

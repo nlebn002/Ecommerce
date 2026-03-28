@@ -39,13 +39,5 @@ public sealed class BasketItem : Entity
         ProductName = productName;
         UnitPrice = unitPrice;
     }
-
-    public void Restore(int quantity, string productName, decimal unitPrice)
-    {
-        IsDeleted = false;
-        Quantity = quantity;
-        ProductName = productName;
-        UnitPrice = unitPrice;
-    }
 }
 
