@@ -47,11 +47,13 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
                     entry.Property(entity => entity.CreatedDate).CurrentValue = utcNow;
                     entry.Property(entity => entity.UpdatedDate).CurrentValue = null;
                     entry.Property(entity => entity.IsDeleted).CurrentValue = false;
+                    SetConcurrencyToken(entry);
                     break;
 
                 case EntityState.Modified:
                     entry.Property(entity => entity.CreatedDate).IsModified = false;
                     entry.Property(entity => entity.UpdatedDate).CurrentValue = utcNow;
+                    SetConcurrencyToken(entry);
                     break;
 
                 case EntityState.Deleted:
@@ -59,8 +61,14 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
                     entry.Property(entity => entity.CreatedDate).IsModified = false;
                     entry.Property(entity => entity.IsDeleted).CurrentValue = true;
                     entry.Property(entity => entity.UpdatedDate).CurrentValue = utcNow;
+                    SetConcurrencyToken(entry);
                     break;
             }
         }
+    }
+
+    private static void SetConcurrencyToken(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Entity> entry)
+    {
+        entry.Property(entity => entity.ConcurrencyToken).CurrentValue = Guid.NewGuid();
     }
 }

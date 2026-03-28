@@ -25,6 +25,10 @@ internal static class ModelBuilderExtensions
             modelBuilder.Entity(entityType.ClrType)
                 .Property(nameof(Entity.IsDeleted))
                 .IsRequired();
+
+            modelBuilder.Entity(entityType.ClrType)
+                .Property(nameof(Entity.ConcurrencyToken))
+                .IsConcurrencyToken();
         }
     }
 

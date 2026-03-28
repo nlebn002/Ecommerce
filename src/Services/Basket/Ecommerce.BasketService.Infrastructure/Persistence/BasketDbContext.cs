@@ -22,5 +22,17 @@ public sealed class BasketDbContext : DbContext, IBasketDbContext
         modelBuilder.ApplyAuditPropertyConventions();
         modelBuilder.ApplySoftDeleteQueryFilters();
     }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new BasketConflictException("The basket was changed by another request. Reload and try again.");
+        }
+    }
 }
 
