@@ -8,7 +8,6 @@ internal sealed class BasketConfiguration : IEntityTypeConfiguration<Basket>
 {
     public void Configure(EntityTypeBuilder<Basket> builder)
     {
-        builder.ToTable("baskets");
         builder.HasKey(entity => entity.Id);
 
         builder.Property(entity => entity.Id)

@@ -41,11 +41,7 @@ app.MapGet("/", () => Results.Ok(new { service = "basket-api", status = "ok" }))
 app.MapBasketEndpoints();
 app.MapDefaultEndpoints();
 
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
-    await dbContext.Database.EnsureCreatedAsync();
-}
+await BasketDbInitializer.InitializeDatabaseAsync(app.Services, app.Environment);
 
 app.Run();
 
