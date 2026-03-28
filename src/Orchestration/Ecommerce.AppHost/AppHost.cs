@@ -1,7 +1,11 @@
+using k8s.Models;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume();
+var postgresUserName = builder.AddParameter("postgres-username", "postgres");
+var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+var postgres = builder.AddPostgres("postgres", postgresUserName, postgresPassword, 5432)
+    .WithDataBindMount(@"C:\Temp\databases\basket");
 
 var basketDb = postgres.AddDatabase("BasketDb", "basketdb");
 
