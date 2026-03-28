@@ -15,7 +15,7 @@ public static class CheckoutBasketEndpoint
     }
 
     private static async Task<Ok<BasketDto>> HandleAsync(
-        [FromRoute] string basketId,
+        [FromRoute] Guid basketId,
         IValidator<CheckoutBasketRequest> validator,
         CheckoutBasketService service,
         CancellationToken cancellationToken)
@@ -32,13 +32,13 @@ public static class CheckoutBasketEndpoint
     }
 }
 
-public sealed record CheckoutBasketRequest(string BasketId);
+public sealed record CheckoutBasketRequest(Guid BasketId);
 
 public sealed class CheckoutBasketRequestValidator : AbstractValidator<CheckoutBasketRequest>
 {
     public CheckoutBasketRequestValidator()
     {
-        RuleFor(request => request.BasketId).NotEmpty().WithMessage("Basket id is required.");
+        RuleFor(request => request.BasketId).NotEqual(Guid.Empty).WithMessage("Basket id is required.");
     }
 }
 

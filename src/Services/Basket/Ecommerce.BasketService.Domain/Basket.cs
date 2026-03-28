@@ -1,18 +1,23 @@
 namespace Ecommerce.BasketService.Domain;
 
-public sealed class Basket
+public sealed class Basket : IEntity
 {
     private Basket()
     {
     }
 
-    private Basket(string id, string customerId)
+    private Basket(Guid id, string customerId)
     {
         Id = id;
+        CreatedDate = DateTime.UtcNow;
         CustomerId = customerId;
     }
 
-    public string Id { get; private set; } = string.Empty;
+    public Guid Id { get; private set; }
+
+    public DateTime CreatedDate { get; private set; }
+
+    public bool IsDeleted { get; private set; }
 
     public string CustomerId { get; private set; } = string.Empty;
 
@@ -22,21 +27,29 @@ public sealed class Basket
 
     public ICollection<BasketItem> Items { get; private set; } = new List<BasketItem>();
 
-    public static Basket Create(string id, string customerId) => new(id, customerId);
+    public static Basket Create(Guid id, string customerId) => new(id, customerId);
 
     public bool IsActive => Status == BasketStatus.Active;
 
     public void AddOrUpdateItem(string productId, string productName, int quantity, decimal unitPrice)
     {
-        var existingItem = Items.SingleOrDefault(item => item.ProductId == productId);
-        if (existingItem is null)
+        var existingActiveItem = Items.SingleOrDefault(item => item.ProductId == productId && !item.IsDeleted);
+        if (existingActiveItem is not null)
         {
-            Items.Add(new BasketItem(productId, productName, quantity, unitPrice));
+            existingActiveItem.IncreaseQuantity(quantity);
+            existingActiveItem.UpdateDetails(productName, unitPrice);
         }
         else
         {
-            existingItem.IncreaseQuantity(quantity);
-            existingItem.UpdateDetails(productName, unitPrice);
+            var deletedItem = Items.SingleOrDefault(item => item.ProductId == productId && item.IsDeleted);
+            if (deletedItem is null)
+            {
+                Items.Add(BasketItem.Create(Id, productId, productName, quantity, unitPrice));
+            }
+            else
+            {
+                deletedItem.Restore(quantity, productName, unitPrice);
+            }
         }
 
         RecalculateTotal();
@@ -44,13 +57,13 @@ public sealed class Basket
 
     public bool RemoveItem(string productId)
     {
-        var item = Items.SingleOrDefault(existingItem => existingItem.ProductId == productId);
+        var item = Items.SingleOrDefault(existingItem => existingItem.ProductId == productId && !existingItem.IsDeleted);
         if (item is null)
         {
             return false;
         }
 
-        Items.Remove(item);
+        item.MarkDeleted();
         RecalculateTotal();
         return true;
     }
@@ -62,7 +75,9 @@ public sealed class Basket
 
     private void RecalculateTotal()
     {
-        Total = Items.Sum(item => item.Quantity * item.UnitPrice);
+        Total = Items
+            .Where(item => !item.IsDeleted)
+            .Sum(item => item.Quantity * item.UnitPrice);
     }
 }
 

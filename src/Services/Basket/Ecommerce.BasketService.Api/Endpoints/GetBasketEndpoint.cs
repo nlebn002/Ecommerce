@@ -16,7 +16,7 @@ public static class GetBasketEndpoint
     }
 
     private static async Task<Ok<BasketDto>> HandleAsync(
-        [FromRoute] string basketId,
+        [FromRoute] Guid basketId,
         [FromQuery] string? customerId,
         IValidator<GetBasketRequest> validator,
         GetBasketService service,
@@ -34,13 +34,13 @@ public static class GetBasketEndpoint
     }
 }
 
-public sealed record GetBasketRequest(string BasketId, string? CustomerId);
+public sealed record GetBasketRequest(Guid BasketId, string? CustomerId);
 
 public sealed class GetBasketRequestValidator : AbstractValidator<GetBasketRequest>
 {
     public GetBasketRequestValidator()
     {
-        RuleFor(request => request.BasketId).NotEmpty();
+        RuleFor(request => request.BasketId).NotEqual(Guid.Empty);
     }
 }
 

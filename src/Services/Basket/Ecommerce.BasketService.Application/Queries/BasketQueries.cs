@@ -7,7 +7,7 @@ internal static class BasketQueries
 {
     public static Task<Basket?> GetBasketByIdAsync(
         this IBasketDbContext dbContext,
-        string basketId,
+        Guid basketId,
         CancellationToken cancellationToken)
     {
         return dbContext.Baskets

@@ -3,7 +3,7 @@ using Ecommerce.BasketService.Domain;
 namespace Ecommerce.BasketService.Application;
 
 public sealed record BasketDto(
-    string BasketId,
+    Guid BasketId,
     string CustomerId,
     string Status,
     decimal Total,
@@ -19,6 +19,7 @@ internal static class BasketDtoMappings
             basket.Status.ToString(),
             basket.Total,
             basket.Items
+                .Where(item => !item.IsDeleted)
                 .OrderBy(item => item.ProductId, StringComparer.Ordinal)
                 .Select(item => item.ToDto())
                 .ToArray());

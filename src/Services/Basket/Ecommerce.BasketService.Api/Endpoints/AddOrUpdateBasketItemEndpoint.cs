@@ -15,7 +15,7 @@ public static class AddOrUpdateBasketItemEndpoint
     }
 
     private static async Task<Ok<BasketDto>> HandleAsync(
-        [FromRoute] string basketId,
+        [FromRoute] Guid basketId,
         [FromBody] UpsertBasketItemRequest request,
         IValidator<UpsertBasketItemRequest> validator,
         AddOrUpdateBasketItemService service,

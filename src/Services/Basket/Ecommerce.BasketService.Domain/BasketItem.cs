@@ -1,18 +1,29 @@
 namespace Ecommerce.BasketService.Domain;
 
-public sealed class BasketItem
+public sealed class BasketItem : IEntity
 {
     private BasketItem()
     {
     }
 
-    public BasketItem(string productId, string productName, int quantity, decimal unitPrice)
+    private BasketItem(Guid basketId, string productId, string productName, int quantity, decimal unitPrice)
     {
+        Id = Guid.NewGuid();
+        CreatedDate = DateTime.UtcNow;
+        BasketId = basketId;
         ProductId = productId;
         ProductName = productName;
         Quantity = quantity;
         UnitPrice = unitPrice;
     }
+
+    public Guid Id { get; private set; }
+
+    public DateTime CreatedDate { get; private set; }
+
+    public bool IsDeleted { get; private set; }
+
+    public Guid BasketId { get; private set; }
 
     public string ProductId { get; private set; } = string.Empty;
 
@@ -22,6 +33,9 @@ public sealed class BasketItem
 
     public decimal UnitPrice { get; private set; }
 
+    public static BasketItem Create(Guid basketId, string productId, string productName, int quantity, decimal unitPrice) =>
+        new(basketId, productId, productName, quantity, unitPrice);
+
     public void IncreaseQuantity(int quantity)
     {
         Quantity += quantity;
@@ -29,6 +43,19 @@ public sealed class BasketItem
 
     public void UpdateDetails(string productName, decimal unitPrice)
     {
+        ProductName = productName;
+        UnitPrice = unitPrice;
+    }
+
+    public void MarkDeleted()
+    {
+        IsDeleted = true;
+    }
+
+    public void Restore(int quantity, string productName, decimal unitPrice)
+    {
+        IsDeleted = false;
+        Quantity = quantity;
         ProductName = productName;
         UnitPrice = unitPrice;
     }

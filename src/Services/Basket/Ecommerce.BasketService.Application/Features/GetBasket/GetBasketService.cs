@@ -32,5 +32,5 @@ public sealed class GetBasketService
     }
 }
 
-public sealed record GetBasketQuery(string BasketId, string? CustomerId);
+public sealed record GetBasketQuery(Guid BasketId, string? CustomerId);
 

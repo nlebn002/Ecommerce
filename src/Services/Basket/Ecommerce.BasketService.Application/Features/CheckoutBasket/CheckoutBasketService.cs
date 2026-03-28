@@ -37,5 +37,5 @@ public sealed class CheckoutBasketService
     }
 }
 
-public sealed record CheckoutBasketCommand(string BasketId);
+public sealed record CheckoutBasketCommand(Guid BasketId);
 

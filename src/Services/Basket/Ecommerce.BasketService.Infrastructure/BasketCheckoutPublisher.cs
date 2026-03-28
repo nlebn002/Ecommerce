@@ -18,6 +18,7 @@ public sealed class BasketCheckoutPublisher : IBasketCheckoutPublisher
         var correlationId = Guid.NewGuid();
 
         var itemsV1 = basket.Items
+            .Where(item => !item.IsDeleted)
             .Select(item => new Ecommerce.Contracts.V1.BasketItem
             {
                 ProductId = item.ProductId,
@@ -28,6 +29,7 @@ public sealed class BasketCheckoutPublisher : IBasketCheckoutPublisher
             .ToArray();
 
         var itemsV2 = basket.Items
+            .Where(item => !item.IsDeleted)
             .Select(item => new Ecommerce.Contracts.V2.BasketItem
             {
                 ProductId = item.ProductId,
@@ -39,7 +41,7 @@ public sealed class BasketCheckoutPublisher : IBasketCheckoutPublisher
 
         await _publishEndpoint.Publish(new Ecommerce.Contracts.V1.BasketCheckedOut
         {
-            BasketId = basket.Id,
+            BasketId = basket.Id.ToString(),
             CustomerId = basket.CustomerId,
             Items = itemsV1,
             ItemsTotal = basket.Total,
@@ -48,7 +50,7 @@ public sealed class BasketCheckoutPublisher : IBasketCheckoutPublisher
 
         await _publishEndpoint.Publish(new Ecommerce.Contracts.V2.BasketCheckedOut
         {
-            BasketId = basket.Id,
+            BasketId = basket.Id.ToString(),
             CustomerId = basket.CustomerId,
             Items = itemsV2,
             ItemsTotal = basket.Total,
