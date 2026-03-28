@@ -16,7 +16,7 @@ public static class RemoveBasketItemEndpoint
 
     private static async Task<Ok<BasketDto>> HandleAsync(
         [FromRoute] Guid basketId,
-        [FromRoute] string productId,
+        [FromRoute] Guid productId,
         IValidator<RemoveBasketItemRequest> validator,
         RemoveBasketItemHandler handler,
         CancellationToken cancellationToken)
@@ -33,14 +33,14 @@ public static class RemoveBasketItemEndpoint
     }
 }
 
-public sealed record RemoveBasketItemRequest(Guid BasketId, string ProductId);
+public sealed record RemoveBasketItemRequest(Guid BasketId, Guid ProductId);
 
 public sealed class RemoveBasketItemRequestValidator : AbstractValidator<RemoveBasketItemRequest>
 {
     public RemoveBasketItemRequestValidator()
     {
         RuleFor(request => request.BasketId).NotEqual(Guid.Empty).WithMessage("Basket id is required.");
-        RuleFor(request => request.ProductId).NotEmpty().WithMessage("Product id is required.");
+        RuleFor(request => request.ProductId).NotEqual(Guid.Empty).WithMessage("Product id is required.");
     }
 }
 

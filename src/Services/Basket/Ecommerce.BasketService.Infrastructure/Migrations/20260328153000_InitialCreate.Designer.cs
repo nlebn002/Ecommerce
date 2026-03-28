@@ -36,7 +36,7 @@ partial class InitialCreate
 
             b.Property(entity => entity.CustomerId)
                 .IsRequired()
-                .HasColumnType("text");
+                .HasColumnType("uuid");
 
             b.Property(entity => entity.IsDeleted)
                 .HasColumnType("boolean");
@@ -81,7 +81,7 @@ partial class InitialCreate
 
             b.Property(entity => entity.ProductId)
                 .IsRequired()
-                .HasColumnType("text");
+                .HasColumnType("uuid");
 
             b.Property(entity => entity.ProductName)
                 .IsRequired()

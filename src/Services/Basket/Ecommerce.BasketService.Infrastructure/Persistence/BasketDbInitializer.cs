@@ -28,9 +28,9 @@ public static class BasketDbInitializer
             return;
         }
 
-        var basket = Basket.Create(Guid.Parse("11111111-1111-1111-1111-111111111111"), "seed-customer");
-        basket.AddOrUpdateItem("prod-coffee", "Coffee Beans", 2, 12.50m);
-        basket.AddOrUpdateItem("prod-mug", "Ceramic Mug", 1, 8.00m);
+        var basket = Basket.Create(Guid.Parse("11111111-1111-1111-1111-111111111111"));
+        basket.AddOrUpdateItem(Guid.Parse("22222222-2222-2222-2222-222222222222"), "Coffee Beans", 2, 12.50m);
+        basket.AddOrUpdateItem(Guid.Parse("33333333-3333-3333-3333-333333333333"), "Ceramic Mug", 1, 8.00m);
 
         dbContext.Baskets.Add(basket);
         await dbContext.SaveChangesAsync();

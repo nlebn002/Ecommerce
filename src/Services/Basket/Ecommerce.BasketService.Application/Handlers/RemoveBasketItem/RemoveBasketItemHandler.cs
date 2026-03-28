@@ -32,5 +32,5 @@ public sealed class RemoveBasketItemHandler
     }
 }
 
-public sealed record RemoveBasketItemCommand(Guid BasketId, string ProductId);
+public sealed record RemoveBasketItemCommand(Guid BasketId, Guid ProductId);
 

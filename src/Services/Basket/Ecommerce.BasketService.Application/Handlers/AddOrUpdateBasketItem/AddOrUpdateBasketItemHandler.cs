@@ -36,7 +36,7 @@ public sealed class AddOrUpdateBasketItemHandler
 
 public sealed record AddOrUpdateBasketItemCommand(
     Guid BasketId,
-    string ProductId,
+    Guid ProductId,
     string ProductName,
     int Quantity,
     decimal UnitPrice);

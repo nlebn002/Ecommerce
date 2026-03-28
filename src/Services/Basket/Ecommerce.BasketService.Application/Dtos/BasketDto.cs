@@ -4,7 +4,7 @@ namespace Ecommerce.BasketService.Application;
 
 public sealed record BasketDto(
     Guid BasketId,
-    string CustomerId,
+    Guid CustomerId,
     string Status,
     decimal Total,
     IReadOnlyList<BasketItemDto> Items);
@@ -20,7 +20,7 @@ internal static class BasketDtoMappings
             basket.Total,
             basket.Items
                 .Where(item => !item.IsDeleted)
-                .OrderBy(item => item.ProductId, StringComparer.Ordinal)
+                .OrderBy(item => item.ProductId)
                 .Select(item => item.ToDto())
                 .ToArray());
     }

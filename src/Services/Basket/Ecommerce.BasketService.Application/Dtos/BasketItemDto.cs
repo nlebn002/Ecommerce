@@ -2,7 +2,7 @@ using Ecommerce.BasketService.Domain;
 
 namespace Ecommerce.BasketService.Application;
 
-public sealed record BasketItemDto(string ProductId, string ProductName, int Quantity, decimal UnitPrice);
+public sealed record BasketItemDto(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice);
 
 internal static class BasketItemDtoMappings
 {

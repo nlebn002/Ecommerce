@@ -6,13 +6,13 @@ public sealed class Basket : Entity
     {
     }
 
-    private Basket(Guid id, string customerId)
+    private Basket(Guid customerId)
     {
-        Id = id;
+        Id = Guid.NewGuid();
         CustomerId = customerId;
     }
 
-    public string CustomerId { get; private set; } = string.Empty;
+    public Guid CustomerId { get; private set; }
 
     public BasketStatus Status { get; private set; } = BasketStatus.Active;
 
@@ -20,11 +20,11 @@ public sealed class Basket : Entity
 
     public ICollection<BasketItem> Items { get; private set; } = new List<BasketItem>();
 
-    public static Basket Create(Guid id, string customerId) => new(id, customerId);
+    public static Basket Create(Guid customerId) => new(customerId);
 
     public bool IsActive => Status == BasketStatus.Active;
 
-    public void AddOrUpdateItem(string productId, string productName, int quantity, decimal unitPrice)
+    public void AddOrUpdateItem(Guid productId, string productName, int quantity, decimal unitPrice)
     {
         var existingActiveItem = Items.SingleOrDefault(item => item.ProductId == productId && !item.IsDeleted);
         if (existingActiveItem is not null)
@@ -40,7 +40,7 @@ public sealed class Basket : Entity
         RecalculateTotal();
     }
 
-    public bool RemoveItem(string productId)
+    public bool RemoveItem(Guid productId)
     {
         var item = Items.SingleOrDefault(existingItem => existingItem.ProductId == productId && !existingItem.IsDeleted);
         if (item is null)

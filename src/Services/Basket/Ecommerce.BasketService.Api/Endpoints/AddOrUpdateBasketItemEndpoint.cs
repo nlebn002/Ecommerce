@@ -36,7 +36,7 @@ public static class AddOrUpdateBasketItemEndpoint
 }
 
 public sealed record UpsertBasketItemRequest(
-    string ProductId,
+    Guid ProductId,
     string ProductName,
     int Quantity,
     decimal UnitPrice);
@@ -45,7 +45,7 @@ public sealed class UpsertBasketItemRequestValidator : AbstractValidator<UpsertB
 {
     public UpsertBasketItemRequestValidator()
     {
-        RuleFor(request => request.ProductId).NotEmpty();
+        RuleFor(request => request.ProductId).NotEqual(Guid.Empty);
         RuleFor(request => request.ProductName).NotEmpty();
         RuleFor(request => request.Quantity).GreaterThan(0);
         RuleFor(request => request.UnitPrice).GreaterThanOrEqualTo(0);

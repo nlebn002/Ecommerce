@@ -56,7 +56,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher
 
         await _publishEndpoint.Publish(new Ecommerce.Contracts.V1.BasketCheckedOut
         {
-            BasketId = basketCheckedOut.BasketId.ToString(),
+            BasketId = basketCheckedOut.BasketId,
             CustomerId = basketCheckedOut.CustomerId,
             Items = itemsV1,
             ItemsTotal = basketCheckedOut.ItemsTotal,
@@ -65,7 +65,7 @@ public sealed class DomainEventDispatcher : IDomainEventDispatcher
 
         await _publishEndpoint.Publish(new Ecommerce.Contracts.V2.BasketCheckedOut
         {
-            BasketId = basketCheckedOut.BasketId.ToString(),
+            BasketId = basketCheckedOut.BasketId,
             CustomerId = basketCheckedOut.CustomerId,
             Items = itemsV2,
             ItemsTotal = basketCheckedOut.ItemsTotal,

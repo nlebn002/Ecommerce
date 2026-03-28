@@ -6,7 +6,7 @@ public sealed class BasketItem : Entity
     {
     }
 
-    private BasketItem(Guid basketId, string productId, string productName, int quantity, decimal unitPrice)
+    private BasketItem(Guid basketId, Guid productId, string productName, int quantity, decimal unitPrice)
     {
         Id = Guid.NewGuid();
         BasketId = basketId;
@@ -18,7 +18,7 @@ public sealed class BasketItem : Entity
 
     public Guid BasketId { get; private set; }
 
-    public string ProductId { get; private set; } = string.Empty;
+    public Guid ProductId { get; private set; }
 
     public string ProductName { get; private set; } = string.Empty;
 
@@ -26,7 +26,7 @@ public sealed class BasketItem : Entity
 
     public decimal UnitPrice { get; private set; }
 
-    public static BasketItem Create(Guid basketId, string productId, string productName, int quantity, decimal unitPrice) =>
+    public static BasketItem Create(Guid basketId, Guid productId, string productName, int quantity, decimal unitPrice) =>
         new(basketId, productId, productName, quantity, unitPrice);
 
     public void IncreaseQuantity(int quantity)

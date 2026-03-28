@@ -19,12 +19,12 @@ public sealed class GetBasketHandler
             return basket.ToDto();
         }
 
-        if (string.IsNullOrWhiteSpace(query.CustomerId))
+        if (query.CustomerId is null || query.CustomerId == Guid.Empty)
         {
             throw BasketValidationException.For("customerId", "A customer id is required when creating a basket.");
         }
 
-        basket = Basket.Create(query.BasketId, query.CustomerId);
+        basket = Basket.Create(query.CustomerId.Value);
         await _dbContext.Baskets.AddAsync(basket, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -32,5 +32,5 @@ public sealed class GetBasketHandler
     }
 }
 
-public sealed record GetBasketQuery(Guid BasketId, string? CustomerId);
+public sealed record GetBasketQuery(Guid BasketId, Guid? CustomerId);
 

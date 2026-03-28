@@ -2,12 +2,12 @@ namespace Ecommerce.BasketService.Domain;
 
 public sealed record BasketCheckedOutDomainEvent(
     Guid BasketId,
-    string CustomerId,
+    Guid CustomerId,
     IReadOnlyCollection<BasketCheckedOutItem> Items,
     decimal ItemsTotal) : IDomainEvent;
 
 public sealed record BasketCheckedOutItem(
-    string ProductId,
+    Guid ProductId,
     string ProductName,
     int Quantity,
     decimal UnitPrice);
