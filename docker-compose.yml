@@ -26,13 +26,13 @@ services:
       context: .
       dockerfile: src/Services/Basket/Ecommerce.Basket.Api/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__BasketDb: Host=postgres;Port=5432;Database=basketdb;Username=ecommerce;Password=ecommerce
       ConnectionStrings__Redis: redis:6379
       MessageBroker__Host: rabbitmq
     ports:
-      - "5100:8080"
+      - "5020:8080"
     depends_on:
       - postgres
       - rabbitmq
@@ -43,12 +43,12 @@ services:
       context: .
       dockerfile: src/Services/Order/Ecommerce.Order.Api/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__OrderDb: Host=postgres;Port=5432;Database=orderdb;Username=ecommerce;Password=ecommerce
       MessageBroker__Host: rabbitmq
     ports:
-      - "5200:8080"
+      - "5030:8080"
     depends_on:
       - postgres
       - rabbitmq
@@ -58,12 +58,12 @@ services:
       context: .
       dockerfile: src/Services/Logistics/Ecommerce.Logistics.Api/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__LogisticsDb: Host=postgres;Port=5432;Database=logisticsdb;Username=ecommerce;Password=ecommerce
       MessageBroker__Host: rabbitmq
     ports:
-      - "5300:8080"
+      - "5040:8080"
     depends_on:
       - postgres
       - rabbitmq
@@ -73,10 +73,10 @@ services:
       context: .
       dockerfile: src/Gateway/Ecommerce.Gateway/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
     ports:
-      - "5000:8080"
+      - "5010:8080"
     depends_on:
       - basket-api
       - order-api
