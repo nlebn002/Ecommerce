@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ecommerce.Basket.Application\Ecommerce.Basket.Application.csproj" />
+    <ProjectReference Include="..\Ecommerce.Basket.Domain\Ecommerce.Basket.Domain.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Contracts\Ecommerce.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

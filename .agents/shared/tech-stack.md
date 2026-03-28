@@ -78,3 +78,5 @@
 - MediatR
 - Shared database
 - Synchronous inter-service checkout flow
+- Don't use Result pattern
+- Don't use Repository pattern. Use direct dbContext.
