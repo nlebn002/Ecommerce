@@ -1,17 +1,17 @@
 namespace Ecommerce.BasketService.Application;
 
-public sealed class RemoveBasketItemService
+public sealed class RemoveBasketItemHandler
 {
     private readonly IBasketDbContext _dbContext;
 
-    public RemoveBasketItemService(IBasketDbContext dbContext)
+    public RemoveBasketItemHandler(IBasketDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     public async Task<BasketDto> ExecuteAsync(RemoveBasketItemCommand command, CancellationToken cancellationToken)
     {
-        var basket = await _dbContext.GetBasketByIdAsync(command.BasketId, cancellationToken);
+        var basket = await _dbContext.GetBasketAggregateByIdAsync(command.BasketId, cancellationToken);
         if (basket is null)
         {
             throw new BasketNotFoundException("The basket was not found.");

@@ -19,7 +19,7 @@ public static class GetBasketEndpoint
         [FromRoute] Guid basketId,
         [FromQuery] string? customerId,
         IValidator<GetBasketRequest> validator,
-        GetBasketService service,
+        GetBasketHandler handler,
         CancellationToken cancellationToken)
     {
         var request = new GetBasketRequest(basketId, customerId);
@@ -29,7 +29,7 @@ public static class GetBasketEndpoint
             throw new ApiValidationException(validationResult);
         }
 
-        var basket = await service.ExecuteAsync(new GetBasketQuery(request.BasketId, request.CustomerId), cancellationToken);
+        var basket = await handler.ExecuteAsync(new GetBasketQuery(request.BasketId, request.CustomerId), cancellationToken);
         return TypedResults.Ok(basket);
     }
 }

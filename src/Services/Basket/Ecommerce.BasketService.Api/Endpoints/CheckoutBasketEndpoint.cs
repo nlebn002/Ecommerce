@@ -17,7 +17,7 @@ public static class CheckoutBasketEndpoint
     private static async Task<Ok<BasketDto>> HandleAsync(
         [FromRoute] Guid basketId,
         IValidator<CheckoutBasketRequest> validator,
-        CheckoutBasketService service,
+        CheckoutBasketHandler handler,
         CancellationToken cancellationToken)
     {
         var request = new CheckoutBasketRequest(basketId);
@@ -27,7 +27,7 @@ public static class CheckoutBasketEndpoint
             throw new ApiValidationException(validationResult);
         }
 
-        var basket = await service.ExecuteAsync(new CheckoutBasketCommand(request.BasketId), cancellationToken);
+        var basket = await handler.ExecuteAsync(new CheckoutBasketCommand(request.BasketId), cancellationToken);
         return TypedResults.Ok(basket);
     }
 }

@@ -1,10 +1,13 @@
 using Ecommerce.BasketService.Application;
+using Ecommerce.BasketService.Infrastructure.Messaging;
+using Ecommerce.BasketService.Infrastructure.Persistence;
+using Ecommerce.BasketService.Infrastructure.Persistence.Interceptors;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ecommerce.BasketService.Infrastructure;
+namespace Ecommerce.BasketService.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
@@ -12,9 +15,13 @@ public static class ServiceCollectionExtensions
     {
         var basketDbConnectionString =
             configuration.GetConnectionString("BasketDb")
-            ?? "Host=localhost;Port=5432;Database=basketdb;Username=ecommerce;Password=ecommerce";
+            ?? throw new ArgumentNullException("Basket db connection string is null");
 
-        services.AddDbContext<BasketDbContext>(options => options.UseNpgsql(basketDbConnectionString));
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<AuditSaveChangesInterceptor>();
+        services.AddDbContext<BasketDbContext>((serviceProvider, options) =>
+            options.UseNpgsql(basketDbConnectionString)
+                .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
         services.AddScoped<IBasketDbContext>(serviceProvider => serviceProvider.GetRequiredService<BasketDbContext>());
 
         services.AddMassTransit(bus =>

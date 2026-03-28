@@ -2,7 +2,7 @@ using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
 using MassTransit;
 
-namespace Ecommerce.BasketService.Infrastructure;
+namespace Ecommerce.BasketService.Infrastructure.Messaging;
 
 public sealed class BasketCheckoutPublisher : IBasketCheckoutPublisher
 {

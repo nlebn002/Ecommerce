@@ -1,6 +1,6 @@
 namespace Ecommerce.BasketService.Domain;
 
-public sealed class BasketItem : IEntity
+public sealed class BasketItem : Entity
 {
     private BasketItem()
     {
@@ -9,19 +9,12 @@ public sealed class BasketItem : IEntity
     private BasketItem(Guid basketId, string productId, string productName, int quantity, decimal unitPrice)
     {
         Id = Guid.NewGuid();
-        CreatedDate = DateTime.UtcNow;
         BasketId = basketId;
         ProductId = productId;
         ProductName = productName;
         Quantity = quantity;
         UnitPrice = unitPrice;
     }
-
-    public Guid Id { get; private set; }
-
-    public DateTime CreatedDate { get; private set; }
-
-    public bool IsDeleted { get; private set; }
 
     public Guid BasketId { get; private set; }
 
@@ -45,11 +38,6 @@ public sealed class BasketItem : IEntity
     {
         ProductName = productName;
         UnitPrice = unitPrice;
-    }
-
-    public void MarkDeleted()
-    {
-        IsDeleted = true;
     }
 
     public void Restore(int quantity, string productName, decimal unitPrice)

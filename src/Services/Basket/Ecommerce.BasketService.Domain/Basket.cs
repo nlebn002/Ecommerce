@@ -1,6 +1,6 @@
 namespace Ecommerce.BasketService.Domain;
 
-public sealed class Basket : IEntity
+public sealed class Basket : Entity
 {
     private Basket()
     {
@@ -9,15 +9,8 @@ public sealed class Basket : IEntity
     private Basket(Guid id, string customerId)
     {
         Id = id;
-        CreatedDate = DateTime.UtcNow;
         CustomerId = customerId;
     }
-
-    public Guid Id { get; private set; }
-
-    public DateTime CreatedDate { get; private set; }
-
-    public bool IsDeleted { get; private set; }
 
     public string CustomerId { get; private set; } = string.Empty;
 
@@ -63,7 +56,7 @@ public sealed class Basket : IEntity
             return false;
         }
 
-        item.MarkDeleted();
+        Items.Remove(item);
         RecalculateTotal();
         return true;
     }

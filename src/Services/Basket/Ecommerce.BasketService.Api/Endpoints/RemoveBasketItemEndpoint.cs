@@ -18,7 +18,7 @@ public static class RemoveBasketItemEndpoint
         [FromRoute] Guid basketId,
         [FromRoute] string productId,
         IValidator<RemoveBasketItemRequest> validator,
-        RemoveBasketItemService service,
+        RemoveBasketItemHandler handler,
         CancellationToken cancellationToken)
     {
         var request = new RemoveBasketItemRequest(basketId, productId);
@@ -28,7 +28,7 @@ public static class RemoveBasketItemEndpoint
             throw new ApiValidationException(validationResult);
         }
 
-        var basket = await service.ExecuteAsync(new RemoveBasketItemCommand(request.BasketId, request.ProductId), cancellationToken);
+        var basket = await handler.ExecuteAsync(new RemoveBasketItemCommand(request.BasketId, request.ProductId), cancellationToken);
         return TypedResults.Ok(basket);
     }
 }

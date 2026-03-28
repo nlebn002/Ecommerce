@@ -18,7 +18,7 @@ public static class AddOrUpdateBasketItemEndpoint
         [FromRoute] Guid basketId,
         [FromBody] UpsertBasketItemRequest request,
         IValidator<UpsertBasketItemRequest> validator,
-        AddOrUpdateBasketItemService service,
+        AddOrUpdateBasketItemHandler handler,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -27,7 +27,7 @@ public static class AddOrUpdateBasketItemEndpoint
             throw new ApiValidationException(validationResult);
         }
 
-        var basket = await service.ExecuteAsync(
+        var basket = await handler.ExecuteAsync(
             new AddOrUpdateBasketItemCommand(basketId, request.ProductId, request.ProductName, request.Quantity, request.UnitPrice),
             cancellationToken);
 

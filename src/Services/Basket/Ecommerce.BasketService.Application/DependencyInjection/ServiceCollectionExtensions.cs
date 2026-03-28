@@ -6,10 +6,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBasketApplication(this IServiceCollection services)
     {
-        services.AddScoped<GetBasketService>();
-        services.AddScoped<AddOrUpdateBasketItemService>();
-        services.AddScoped<RemoveBasketItemService>();
-        services.AddScoped<CheckoutBasketService>();
+        services.AddScoped<GetBasketHandler>();
+        services.AddScoped<AddOrUpdateBasketItemHandler>();
+        services.AddScoped<RemoveBasketItemHandler>();
+        services.AddScoped<CheckoutBasketHandler>();
         return services;
     }
 }

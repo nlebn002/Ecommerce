@@ -1,10 +1,10 @@
 namespace Ecommerce.BasketService.Application;
 
-public sealed class AddOrUpdateBasketItemService
+public sealed class AddOrUpdateBasketItemHandler
 {
     private readonly IBasketDbContext _dbContext;
 
-    public AddOrUpdateBasketItemService(IBasketDbContext dbContext)
+    public AddOrUpdateBasketItemHandler(IBasketDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -16,7 +16,7 @@ public sealed class AddOrUpdateBasketItemService
             throw BasketValidationException.For("quantity", "Quantity must be greater than zero.");
         }
 
-        var basket = await _dbContext.GetBasketByIdAsync(command.BasketId, cancellationToken);
+        var basket = await _dbContext.GetBasketAggregateByIdAsync(command.BasketId, cancellationToken);
         if (basket is null)
         {
             throw new BasketNotFoundException("The basket was not found.");

@@ -2,11 +2,11 @@ using Ecommerce.BasketService.Domain;
 
 namespace Ecommerce.BasketService.Application;
 
-public sealed class GetBasketService
+public sealed class GetBasketHandler
 {
     private readonly IBasketDbContext _dbContext;
 
-    public GetBasketService(IBasketDbContext dbContext)
+    public GetBasketHandler(IBasketDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,7 +1,8 @@
 using Asp.Versioning;
 using Ecommerce.BasketService.Api;
 using Ecommerce.BasketService.Application;
-using Ecommerce.BasketService.Infrastructure;
+using Ecommerce.BasketService.Infrastructure.DependencyInjection;
+using Ecommerce.BasketService.Infrastructure.Persistence;
 using FluentValidation;
 using Scalar.AspNetCore;
 using Serilog;
