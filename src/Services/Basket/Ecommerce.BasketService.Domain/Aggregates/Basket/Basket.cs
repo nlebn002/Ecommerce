@@ -26,11 +26,12 @@ public sealed class Basket : Entity
 
     public void AddOrUpdateItem(Guid productId, string productName, int quantity, decimal unitPrice)
     {
+        EnsureActive("Checked out baskets cannot be changed.");
+
         var existingActiveItem = Items.SingleOrDefault(item => item.ProductId == productId && !item.IsDeleted);
         if (existingActiveItem is not null)
         {
-            existingActiveItem.IncreaseQuantity(quantity);
-            existingActiveItem.UpdateDetails(productName, unitPrice);
+            existingActiveItem.AddQuantityAndUpdateDetails(productName, quantity, unitPrice);
         }
         else
         {
@@ -40,21 +41,32 @@ public sealed class Basket : Entity
         RecalculateTotal();
     }
 
-    public bool RemoveItem(Guid productId)
+    public void RemoveItem(Guid productId)
     {
+        EnsureActive("Checked out baskets cannot be changed.");
+
         var item = Items.SingleOrDefault(existingItem => existingItem.ProductId == productId && !existingItem.IsDeleted);
         if (item is null)
         {
-            return false;
+            throw new BasketDomainException("basket_item_not_found", "productId", "The requested basket item was not found.");
         }
 
         Items.Remove(item);
         RecalculateTotal();
-        return true;
     }
 
     public void Checkout()
     {
+        if (!IsActive)
+        {
+            throw new BasketDomainException("basket_inactive", "basketId", "The basket has already been checked out.");
+        }
+
+        if (!Items.Any(item => !item.IsDeleted))
+        {
+            throw new BasketDomainException("basket_empty", "basketId", "The basket must contain at least one item before checkout.");
+        }
+
         Status = BasketStatus.CheckedOut;
         RaiseDomainEvent(new BasketCheckedOutDomainEvent(
             Id,
@@ -71,6 +83,14 @@ public sealed class Basket : Entity
         Total = Items
             .Where(item => !item.IsDeleted)
             .Sum(item => item.Quantity * item.UnitPrice);
+    }
+
+    private void EnsureActive(string message)
+    {
+        if (!IsActive)
+        {
+            throw new BasketDomainException("basket_inactive", "basketId", message);
+        }
     }
 }
 

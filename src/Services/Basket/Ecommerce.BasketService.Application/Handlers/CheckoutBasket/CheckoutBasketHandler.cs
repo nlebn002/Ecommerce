@@ -17,16 +17,6 @@ public sealed class CheckoutBasketHandler
             throw new BasketNotFoundException("The basket was not found.");
         }
 
-        if (!basket.IsActive)
-        {
-            throw new BasketConflictException("The basket has already been checked out.");
-        }
-
-        if (!basket.Items.Any(item => !item.IsDeleted))
-        {
-            throw BasketValidationException.For("basketId", "The basket must contain at least one item before checkout.");
-        }
-
         basket.Checkout();
         await _dbContext.SaveChangesAsync(cancellationToken);
 

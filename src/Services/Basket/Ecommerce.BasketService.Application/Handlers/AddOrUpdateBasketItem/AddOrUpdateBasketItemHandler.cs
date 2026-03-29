@@ -11,20 +11,10 @@ public sealed class AddOrUpdateBasketItemHandler
 
     public async Task<BasketDto> ExecuteAsync(AddOrUpdateBasketItemCommand command, CancellationToken cancellationToken)
     {
-        if (command.Quantity < 1)
-        {
-            throw BasketValidationException.For("quantity", "Quantity must be greater than zero.");
-        }
-
         var basket = await _dbContext.GetBasketByIdAsync(command.BasketId, cancellationToken);
         if (basket is null)
         {
             throw new BasketNotFoundException("The basket was not found.");
-        }
-
-        if (!basket.IsActive)
-        {
-            throw new BasketConflictException("Checked out baskets cannot be changed.");
         }
 
         basket.AddOrUpdateItem(command.ProductId, command.ProductName, command.Quantity, command.UnitPrice);

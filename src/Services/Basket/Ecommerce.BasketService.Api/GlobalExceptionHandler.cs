@@ -1,5 +1,6 @@
 using Ecommerce.BasketService.Api.Exceptions;
 using Ecommerce.BasketService.Application;
+using Ecommerce.BasketService.Domain;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Ecommerce.BasketService.Api;
@@ -21,6 +22,14 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         {
             ApiValidationException validationException => Results.ValidationProblem(validationException.Errors),
             BasketValidationException validationException => Results.ValidationProblem(validationException.Errors),
+            BasketDomainException domainException when domainException.ErrorCode == "basket_inactive" => Results.Problem(
+                title: "Basket conflict",
+                detail: domainException.Message,
+                statusCode: StatusCodes.Status409Conflict),
+            BasketDomainException domainException => Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                [domainException.Field] = [domainException.Message]
+            }),
             BasketNotFoundException notFoundException => Results.Problem(
                 title: "Basket not found",
                 detail: notFoundException.Message,

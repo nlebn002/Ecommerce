@@ -8,6 +8,9 @@ public sealed class BasketItem : Entity
 
     private BasketItem(Guid basketId, Guid productId, string productName, int quantity, decimal unitPrice)
     {
+        EnsureQuantityIsValid(quantity);
+        EnsureUnitPriceIsValid(unitPrice);
+
         Id = Guid.NewGuid();
         BasketId = basketId;
         ProductId = productId;
@@ -31,13 +34,41 @@ public sealed class BasketItem : Entity
 
     public void IncreaseQuantity(int quantity)
     {
+        EnsureQuantityIsValid(quantity);
         Quantity += quantity;
+    }
+
+    public void AddQuantityAndUpdateDetails(string productName, int quantity, decimal unitPrice)
+    {
+        EnsureQuantityIsValid(quantity);
+        EnsureUnitPriceIsValid(unitPrice);
+
+        Quantity += quantity;
+        ProductName = productName;
+        UnitPrice = unitPrice;
     }
 
     public void UpdateDetails(string productName, decimal unitPrice)
     {
+        EnsureUnitPriceIsValid(unitPrice);
         ProductName = productName;
         UnitPrice = unitPrice;
+    }
+
+    private static void EnsureQuantityIsValid(int quantity)
+    {
+        if (quantity < 1)
+        {
+            throw new BasketDomainException("invalid_quantity", "quantity", "Quantity must be greater than zero.");
+        }
+    }
+
+    private static void EnsureUnitPriceIsValid(decimal unitPrice)
+    {
+        if (unitPrice < 0)
+        {
+            throw new BasketDomainException("invalid_unit_price", "unitPrice", "Unit price must be greater than or equal to zero.");
+        }
     }
 }
 

@@ -17,16 +17,7 @@ public sealed class RemoveBasketItemHandler
             throw new BasketNotFoundException("The basket was not found.");
         }
 
-        if (!basket.IsActive)
-        {
-            throw new BasketConflictException("Checked out baskets cannot be changed.");
-        }
-
-        if (!basket.RemoveItem(command.ProductId))
-        {
-            throw BasketValidationException.For("productId", "The requested basket item was not found.");
-        }
-
+        basket.RemoveItem(command.ProductId);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return basket.ToDto();
     }
