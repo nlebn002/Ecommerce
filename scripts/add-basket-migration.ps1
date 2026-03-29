@@ -4,6 +4,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Basket schema changes are intentionally manual. The service does not apply
+# EF Core migrations on startup, so use this script to create reviewed
+# migrations and apply them explicitly in local/dev workflows.
+
 function Pause-BeforeExit {
     Write-Host ''
     Read-Host 'Press Enter to close'

@@ -2,7 +2,6 @@ using Asp.Versioning;
 using Ecommerce.BasketService.Api;
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Infrastructure.DependencyInjection;
-using Ecommerce.BasketService.Infrastructure.Persistence;
 using FluentValidation;
 using Scalar.AspNetCore;
 using Serilog;
@@ -39,9 +38,8 @@ app.MapOpenApi();
 app.MapScalarApiReference("/scalar");
 app.MapGet("/", () => Results.Ok(new { service = "basket-api", status = "ok" }));
 app.MapBasketEndpoints();
+app.MapBasketDevelopmentEndpoints();
 app.MapDefaultEndpoints();
-
-await BasketDbInitializer.InitializeDatabaseAsync(app.Services, app.Environment);
 
 app.Run();
 
