@@ -1,5 +1,6 @@
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
+using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
 using Ecommerce.BasketService.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,17 +8,21 @@ namespace Ecommerce.BasketService.Infrastructure.Persistence;
 
 public sealed class BasketDbContext : DbContext, IBasketDbContext
 {
-    private readonly IDomainEventDispatcher _domainEventDispatcher;
+    private readonly IDomainEventOutboxMessageFactory _domainEventOutboxMessageFactory;
 
-    public BasketDbContext(DbContextOptions<BasketDbContext> options, IDomainEventDispatcher domainEventDispatcher)
+    public BasketDbContext(
+        DbContextOptions<BasketDbContext> options,
+        IDomainEventOutboxMessageFactory domainEventOutboxMessageFactory)
         : base(options)
     {
-        _domainEventDispatcher = domainEventDispatcher;
+        _domainEventOutboxMessageFactory = domainEventOutboxMessageFactory;
     }
 
     public DbSet<Basket> Baskets => Set<Basket>();
 
     public DbSet<BasketItem> BasketItems => Set<BasketItem>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,20 +40,21 @@ public sealed class BasketDbContext : DbContext, IBasketDbContext
 
         try
         {
-            var result = await base.SaveChangesAsync(cancellationToken);
-
             var domainEvents = entitiesWithDomainEvents
                 .SelectMany(entity => entity.DomainEvents)
                 .ToArray();
 
             if (domainEvents.Length > 0)
             {
-                await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+                var outboxMessages = _domainEventOutboxMessageFactory.CreateMessages(domainEvents);
+                OutboxMessages.AddRange(outboxMessages);
+            }
 
-                foreach (var entity in entitiesWithDomainEvents)
-                {
-                    entity.ClearDomainEvents();
-                }
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            foreach (var entity in entitiesWithDomainEvents)
+            {
+                entity.ClearDomainEvents();
             }
 
             return result;

@@ -1,5 +1,5 @@
-using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
+using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -16,16 +16,16 @@ public sealed class BasketDbContextFactory : IDesignTimeDbContextFactory<BasketD
 
         optionsBuilder.UseNpgsql(connectionString);
 
-        return new BasketDbContext(optionsBuilder.Options, NoOpDomainEventDispatcher.Instance);
+        return new BasketDbContext(optionsBuilder.Options, NoOpDomainEventOutboxMessageFactory.Instance);
     }
 
-    private sealed class NoOpDomainEventDispatcher : IDomainEventDispatcher
+    private sealed class NoOpDomainEventOutboxMessageFactory : IDomainEventOutboxMessageFactory
     {
-        public static NoOpDomainEventDispatcher Instance { get; } = new();
+        public static NoOpDomainEventOutboxMessageFactory Instance { get; } = new();
 
-        public Task DispatchAsync(IReadOnlyCollection<IDomainEvent> domainEvents, CancellationToken cancellationToken)
+        public IReadOnlyCollection<OutboxMessage> CreateMessages(IReadOnlyCollection<IDomainEvent> domainEvents)
         {
-            return Task.CompletedTask;
+            return [];
         }
     }
 }

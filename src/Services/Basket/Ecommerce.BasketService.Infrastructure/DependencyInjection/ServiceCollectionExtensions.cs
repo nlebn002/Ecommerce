@@ -1,7 +1,8 @@
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Infrastructure.Persistence;
 using Ecommerce.BasketService.Infrastructure.Persistence.Interceptors;
-using Ecommerce.BasketService.Infrastructure.Messaging;
+using Ecommerce.BasketService.Infrastructure.Messaging.IntegrationEvents;
+using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,20 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(basketDbConnectionString)
                 .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
         services.AddScoped<IBasketDbContext>(serviceProvider => serviceProvider.GetRequiredService<BasketDbContext>());
+        var outboxSection = configuration.GetSection(OutboxProcessorOptions.SectionName);
+        services.AddOptions<OutboxProcessorOptions>()
+            .Configure(options =>
+            {
+                if (int.TryParse(outboxSection["BatchSize"], out var batchSize) && batchSize > 0)
+                {
+                    options.BatchSize = batchSize;
+                }
+
+                if (TimeSpan.TryParse(outboxSection["PollInterval"], out var pollInterval) && pollInterval > TimeSpan.Zero)
+                {
+                    options.PollInterval = pollInterval;
+                }
+            });
 
         services.AddMassTransit(bus =>
         {
@@ -38,7 +53,11 @@ public static class ServiceCollectionExtensions
             });
         });
 
-        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddSingleton<BasketCheckoutIntegrationEventFactory>();
+        services.AddScoped<IDomainEventOutboxMessageFactory, DomainEventOutboxMessageFactory>();
+        services.AddScoped<IOutboxMessagePublisher, OutboxMessagePublisher>();
+        services.AddScoped<OutboxMessageProcessor>();
+        services.AddHostedService<OutboxPublisherService>();
 
         return services;
     }

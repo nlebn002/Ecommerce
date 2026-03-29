@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Ecommerce.BasketService.Infrastructure.Tests</AssemblyName>
+    <RootNamespace>Ecommerce.BasketService.Infrastructure.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Services\Basket\Ecommerce.BasketService.Domain\Ecommerce.BasketService.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Services\Basket\Ecommerce.BasketService.Infrastructure\Ecommerce.BasketService.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
