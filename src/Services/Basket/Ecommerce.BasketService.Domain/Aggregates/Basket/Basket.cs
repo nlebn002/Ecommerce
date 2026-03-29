@@ -51,7 +51,7 @@ public sealed class Basket : Entity
             throw BasketException.Validation(BasketErrorCode.BasketItemNotFound, "productId", "The requested basket item was not found.");
         }
 
-        Items.Remove(item);
+        item.Delete();
         RecalculateTotal();
     }
 

@@ -12,15 +12,11 @@ Make basket item deletion behavior consistent with the chosen persistence strate
 
 ## Tasks
 
-1. Decide whether basket items should be soft-deleted or hard-deleted.
-2. If soft-delete is kept:
-   - add explicit domain behavior for item deletion
+1. Basket items should be soft-deleted
+2. - add explicit domain behavior for item deletion
    - stop relying only on collection removal
    - verify EF query filters and interceptor behavior
-3. If hard-delete is chosen:
-   - simplify the aggregate and persistence model
-   - remove soft-delete assumptions that do not apply
-4. Add tests for the chosen deletion behavior.
+3. Add tests for the chosen deletion behavior.
 
 ## Acceptance Criteria
 

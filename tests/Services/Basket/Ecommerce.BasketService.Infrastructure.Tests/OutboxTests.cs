@@ -111,6 +111,79 @@ public sealed class OutboxTests
         persistedMessage.LastError.Should().Contain("Simulated broker failure");
     }
 
+    [Fact]
+    public async Task SaveChangesAsync_WhenBasketItemIsRemovedThroughAggregate_PersistsSoftDeletedRow_AndQueryFilterHidesIt()
+    {
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 29, 12, 0, 0, TimeSpan.Zero));
+        var databaseName = nameof(SaveChangesAsync_WhenBasketItemIsRemovedThroughAggregate_PersistsSoftDeletedRow_AndQueryFilterHidesIt);
+
+        await using (var arrangeContext = CreateDbContext(databaseName, timeProvider))
+        {
+            var productId = Guid.NewGuid();
+            var basket = Basket.Create(Guid.NewGuid());
+            basket.AddOrUpdateItem(productId, "Keyboard", 1, 25m);
+            arrangeContext.Baskets.Add(basket);
+            await arrangeContext.SaveChangesAsync();
+
+            basket.RemoveItem(productId);
+            await arrangeContext.SaveChangesAsync();
+        }
+
+        await using var assertContext = CreateDbContext(databaseName, timeProvider);
+        (await assertContext.BasketItems.CountAsync()).Should().Be(0);
+
+        var persistedItem = await assertContext.BasketItems
+            .IgnoreQueryFilters()
+            .SingleAsync();
+
+        persistedItem.IsDeleted.Should().BeTrue();
+        persistedItem.UpdatedDate.Should().Be(timeProvider.UtcNow.UtcDateTime);
+
+        var persistedBasket = await assertContext.Baskets.SingleAsync();
+        persistedBasket.Total.Should().Be(0m);
+
+        var activeItemCount = await assertContext.BasketItems
+            .Where(item => item.BasketId == persistedBasket.Id)
+            .CountAsync();
+
+        activeItemCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task SaveChangesAsync_WhenBasketItemIsDeletedViaDbSet_RemoveIsConvertedToSoftDelete()
+    {
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 29, 12, 30, 0, TimeSpan.Zero));
+        var databaseName = nameof(SaveChangesAsync_WhenBasketItemIsDeletedViaDbSet_RemoveIsConvertedToSoftDelete);
+
+        Guid itemId;
+
+        await using (var arrangeContext = CreateDbContext(databaseName, timeProvider))
+        {
+            var basket = Basket.Create(Guid.NewGuid());
+            basket.AddOrUpdateItem(Guid.NewGuid(), "Keyboard", 1, 25m);
+            arrangeContext.Baskets.Add(basket);
+            await arrangeContext.SaveChangesAsync();
+            itemId = basket.Items.Single().Id;
+        }
+
+        await using (var deleteContext = CreateDbContext(databaseName, timeProvider))
+        {
+            var item = await deleteContext.BasketItems.IgnoreQueryFilters().SingleAsync(entity => entity.Id == itemId);
+            deleteContext.BasketItems.Remove(item);
+            await deleteContext.SaveChangesAsync();
+        }
+
+        await using var assertContext = CreateDbContext(databaseName, timeProvider);
+        (await assertContext.BasketItems.CountAsync()).Should().Be(0);
+
+        var persistedItem = await assertContext.BasketItems
+            .IgnoreQueryFilters()
+            .SingleAsync(entity => entity.Id == itemId);
+
+        persistedItem.IsDeleted.Should().BeTrue();
+        persistedItem.UpdatedDate.Should().Be(timeProvider.UtcNow.UtcDateTime);
+    }
+
     private static BasketDbContext CreateDbContext(string databaseName, TimeProvider timeProvider)
     {
         var options = new DbContextOptionsBuilder<BasketDbContext>()

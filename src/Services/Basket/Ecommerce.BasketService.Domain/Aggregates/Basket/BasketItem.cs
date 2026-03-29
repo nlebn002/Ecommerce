@@ -34,12 +34,14 @@ public sealed class BasketItem : Entity
 
     public void IncreaseQuantity(int quantity)
     {
+        EnsureNotDeleted();
         EnsureQuantityIsValid(quantity);
         Quantity += quantity;
     }
 
     public void AddQuantityAndUpdateDetails(string productName, int quantity, decimal unitPrice)
     {
+        EnsureNotDeleted();
         EnsureQuantityIsValid(quantity);
         EnsureUnitPriceIsValid(unitPrice);
 
@@ -50,9 +52,16 @@ public sealed class BasketItem : Entity
 
     public void UpdateDetails(string productName, decimal unitPrice)
     {
+        EnsureNotDeleted();
         EnsureUnitPriceIsValid(unitPrice);
         ProductName = productName;
         UnitPrice = unitPrice;
+    }
+
+    public void Delete()
+    {
+        EnsureNotDeleted();
+        IsDeleted = true;
     }
 
     private static void EnsureQuantityIsValid(int quantity)
@@ -68,6 +77,14 @@ public sealed class BasketItem : Entity
         if (unitPrice < 0)
         {
             throw BasketException.Validation(BasketErrorCode.InvalidUnitPrice, "unitPrice", "Unit price must be greater than or equal to zero.");
+        }
+    }
+
+    private void EnsureNotDeleted()
+    {
+        if (IsDeleted)
+        {
+            throw BasketException.Conflict(BasketErrorCode.BasketInactive, "Deleted basket items cannot be changed.");
         }
     }
 }

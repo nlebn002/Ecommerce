@@ -158,4 +158,41 @@ public sealed class BasketCheckoutTests
             .Where(exception => exception.Code == BasketErrorCode.BasketItemNotFound && exception.Type == BasketErrorType.Validation)
             .WithMessage("The requested basket item was not found.");
     }
+
+    [Fact]
+    public void RemoveItem_SoftDeletesItem_AndRecalculatesTotal()
+    {
+        var removedProductId = Guid.NewGuid();
+        var remainingProductId = Guid.NewGuid();
+        var basket = Basket.Create(Guid.NewGuid());
+        basket.AddOrUpdateItem(removedProductId, "Keyboard", 2, 25m);
+        basket.AddOrUpdateItem(remainingProductId, "Mouse", 1, 10m);
+
+        basket.RemoveItem(removedProductId);
+
+        basket.Total.Should().Be(10m);
+        basket.Items.Should().HaveCount(2);
+        basket.Items.Should().Contain(item => item.ProductId == removedProductId && item.IsDeleted);
+        basket.Items.Should().Contain(item => item.ProductId == remainingProductId && !item.IsDeleted);
+    }
+
+    [Fact]
+    public void AddOrUpdateItem_WhenProductWasPreviouslyDeleted_CreatesNewActiveItem()
+    {
+        var productId = Guid.NewGuid();
+        var basket = Basket.Create(Guid.NewGuid());
+        basket.AddOrUpdateItem(productId, "Keyboard", 1, 20m);
+        basket.RemoveItem(productId);
+
+        basket.AddOrUpdateItem(productId, "Keyboard Pro", 2, 30m);
+
+        basket.Total.Should().Be(60m);
+        basket.Items.Should().HaveCount(2);
+        basket.Items.Should().ContainSingle(item => item.ProductId == productId && item.IsDeleted);
+
+        var activeItem = basket.Items.Should().ContainSingle(item => item.ProductId == productId && !item.IsDeleted).Subject;
+        activeItem.ProductName.Should().Be("Keyboard Pro");
+        activeItem.Quantity.Should().Be(2);
+        activeItem.UnitPrice.Should().Be(30m);
+    }
 }
