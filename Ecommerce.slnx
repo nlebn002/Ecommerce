@@ -26,4 +26,9 @@
     <Project Path="src/SharedKernel/Ecommerce.Common/Ecommerce.Common.csproj" />
     <Project Path="src/SharedKernel/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
   </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Services/" />
+  <Folder Name="/tests/Services/Basket/">
+    <Project Path="tests/Services/Basket/Ecommerce.BasketService.Domain.Tests/Ecommerce.BasketService.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
