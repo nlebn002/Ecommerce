@@ -1,3 +1,5 @@
+using Ecommerce.BasketService.Domain;
+
 namespace Ecommerce.BasketService.Application;
 
 public sealed class RemoveBasketItemHandler
@@ -14,7 +16,7 @@ public sealed class RemoveBasketItemHandler
         var basket = await _dbContext.GetBasketByIdAsync(command.BasketId, cancellationToken);
         if (basket is null)
         {
-            throw new BasketNotFoundException("The basket was not found.");
+            throw BasketException.NotFound(BasketErrorCode.BasketNotFound, "The basket was not found.");
         }
 
         basket.RemoveItem(command.ProductId);

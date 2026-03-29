@@ -59,7 +59,7 @@ public sealed class BasketItem : Entity
     {
         if (quantity < 1)
         {
-            throw new BasketDomainException("invalid_quantity", "quantity", "Quantity must be greater than zero.");
+            throw BasketException.Validation(BasketErrorCode.InvalidQuantity, "quantity", "Quantity must be greater than zero.");
         }
     }
 
@@ -67,7 +67,7 @@ public sealed class BasketItem : Entity
     {
         if (unitPrice < 0)
         {
-            throw new BasketDomainException("invalid_unit_price", "unitPrice", "Unit price must be greater than or equal to zero.");
+            throw BasketException.Validation(BasketErrorCode.InvalidUnitPrice, "unitPrice", "Unit price must be greater than or equal to zero.");
         }
     }
 }

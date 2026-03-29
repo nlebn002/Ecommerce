@@ -50,7 +50,8 @@ public sealed class BasketHandlerContractTests
 
         var act = () => handler.ExecuteAsync(new GetBasketQuery(Guid.NewGuid()), CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketNotFoundException>()
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketNotFound && exception.Type == BasketErrorType.NotFound)
             .WithMessage("The basket was not found.");
         (await dbContext.Baskets.CountAsync()).Should().Be(0);
     }
@@ -65,7 +66,8 @@ public sealed class BasketHandlerContractTests
             new AddOrUpdateBasketItemCommand(Guid.NewGuid(), Guid.NewGuid(), "Keyboard", 1, 25m),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketNotFoundException>();
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketNotFound && exception.Type == BasketErrorType.NotFound);
     }
 
     [Fact]
@@ -81,8 +83,8 @@ public sealed class BasketHandlerContractTests
             new AddOrUpdateBasketItemCommand(basket.Id, Guid.NewGuid(), "Keyboard", 0, 25m),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "invalid_quantity" && exception.Field == "quantity");
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.InvalidQuantity && exception.Type == BasketErrorType.Validation);
     }
 
     [Fact]
@@ -96,8 +98,8 @@ public sealed class BasketHandlerContractTests
 
         var act = () => handler.ExecuteAsync(new CheckoutBasketCommand(basket.Id), CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_empty" && exception.Field == "basketId");
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketEmpty && exception.Type == BasketErrorType.Validation);
     }
 
     [Fact]
@@ -114,8 +116,8 @@ public sealed class BasketHandlerContractTests
 
         var act = () => handler.ExecuteAsync(new RemoveBasketItemCommand(basket.Id, productId), CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_inactive" && exception.Field == "basketId")
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketInactive && exception.Type == BasketErrorType.Conflict)
             .WithMessage("Checked out baskets cannot be changed.");
     }
 
@@ -130,8 +132,8 @@ public sealed class BasketHandlerContractTests
 
         var act = () => handler.ExecuteAsync(new RemoveBasketItemCommand(basket.Id, Guid.NewGuid()), CancellationToken.None);
 
-        await act.Should().ThrowAsync<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_item_not_found" && exception.Field == "productId")
+        await act.Should().ThrowAsync<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketItemNotFound && exception.Type == BasketErrorType.Validation)
             .WithMessage("The requested basket item was not found.");
     }
 

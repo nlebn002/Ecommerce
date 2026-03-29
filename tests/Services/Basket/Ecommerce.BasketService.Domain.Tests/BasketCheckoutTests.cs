@@ -54,8 +54,8 @@ public sealed class BasketCheckoutTests
 
         var act = basket.Checkout;
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_empty" && exception.Field == "basketId")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketEmpty && exception.Type == BasketErrorType.Validation)
             .WithMessage("The basket must contain at least one item before checkout.");
     }
 
@@ -68,8 +68,8 @@ public sealed class BasketCheckoutTests
 
         var act = basket.Checkout;
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_inactive" && exception.Field == "basketId")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketInactive && exception.Type == BasketErrorType.Conflict)
             .WithMessage("The basket has already been checked out.");
     }
 
@@ -80,8 +80,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.AddOrUpdateItem(Guid.NewGuid(), "Keyboard", 0, 20m);
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "invalid_quantity" && exception.Field == "quantity")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.InvalidQuantity && exception.Type == BasketErrorType.Validation)
             .WithMessage("Quantity must be greater than zero.");
     }
 
@@ -92,8 +92,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.AddOrUpdateItem(Guid.NewGuid(), "Keyboard", 1, -0.01m);
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "invalid_unit_price" && exception.Field == "unitPrice")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.InvalidUnitPrice && exception.Type == BasketErrorType.Validation)
             .WithMessage("Unit price must be greater than or equal to zero.");
     }
 
@@ -106,8 +106,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.AddOrUpdateItem(productId, "Keyboard Pro", 2, -0.01m);
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "invalid_unit_price" && exception.Field == "unitPrice");
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.InvalidUnitPrice && exception.Type == BasketErrorType.Validation);
 
         basket.Total.Should().Be(20m);
         basket.Items.Should().ContainSingle();
@@ -127,8 +127,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.AddOrUpdateItem(Guid.NewGuid(), "Mouse", 1, 10m);
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_inactive" && exception.Field == "basketId")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketInactive && exception.Type == BasketErrorType.Conflict)
             .WithMessage("Checked out baskets cannot be changed.");
     }
 
@@ -142,8 +142,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.RemoveItem(productId);
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_inactive" && exception.Field == "basketId")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketInactive && exception.Type == BasketErrorType.Conflict)
             .WithMessage("Checked out baskets cannot be changed.");
     }
 
@@ -154,8 +154,8 @@ public sealed class BasketCheckoutTests
 
         var act = () => basket.RemoveItem(Guid.NewGuid());
 
-        act.Should().Throw<BasketDomainException>()
-            .Where(exception => exception.ErrorCode == "basket_item_not_found" && exception.Field == "productId")
+        act.Should().Throw<BasketException>()
+            .Where(exception => exception.Code == BasketErrorCode.BasketItemNotFound && exception.Type == BasketErrorType.Validation)
             .WithMessage("The requested basket item was not found.");
     }
 }

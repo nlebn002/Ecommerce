@@ -1,3 +1,5 @@
+using Ecommerce.BasketService.Domain;
+
 namespace Ecommerce.BasketService.Application;
 
 public sealed class GetBasketHandler
@@ -14,7 +16,7 @@ public sealed class GetBasketHandler
         var basket = await _dbContext.GetBasketByIdAsync(query.BasketId, cancellationToken);
         if (basket is null)
         {
-            throw new BasketNotFoundException("The basket was not found.");
+            throw BasketException.NotFound(BasketErrorCode.BasketNotFound, "The basket was not found.");
         }
 
         return basket.ToDto();

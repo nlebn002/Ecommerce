@@ -1,5 +1,3 @@
-using Ecommerce.BasketService.Api.Exceptions;
-using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -20,24 +18,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 
         var result = exception switch
         {
-            ApiValidationException validationException => Results.ValidationProblem(validationException.Errors),
-            BasketValidationException validationException => Results.ValidationProblem(validationException.Errors),
-            BasketDomainException domainException when domainException.ErrorCode == "basket_inactive" => Results.Problem(
-                title: "Basket conflict",
-                detail: domainException.Message,
-                statusCode: StatusCodes.Status409Conflict),
-            BasketDomainException domainException => Results.ValidationProblem(new Dictionary<string, string[]>
-            {
-                [domainException.Field] = [domainException.Message]
-            }),
-            BasketNotFoundException notFoundException => Results.Problem(
-                title: "Basket not found",
-                detail: notFoundException.Message,
-                statusCode: StatusCodes.Status404NotFound),
-            BasketConflictException conflictException => Results.Problem(
-                title: "Basket conflict",
-                detail: conflictException.Message,
-                statusCode: StatusCodes.Status409Conflict),
+            BasketException basketException => HandleBasketException(basketException),
             _ => Results.Problem(
                 title: "Server error",
                 statusCode: StatusCodes.Status500InternalServerError)
@@ -45,6 +26,28 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 
         await result.ExecuteAsync(httpContext);
         return true;
+    }
+
+    private static IResult HandleBasketException(BasketException exception)
+    {
+        return exception.Type switch
+        {
+            BasketErrorType.Validation => Results.ValidationProblem(exception.Errors ?? new Dictionary<string, string[]>
+            {
+                [string.Empty] = [exception.Message]
+            }),
+            BasketErrorType.NotFound => Results.Problem(
+                title: "Basket not found",
+                detail: exception.Message,
+                statusCode: StatusCodes.Status404NotFound),
+            BasketErrorType.Conflict => Results.Problem(
+                title: "Basket conflict",
+                detail: exception.Message,
+                statusCode: StatusCodes.Status409Conflict),
+            _ => Results.Problem(
+                title: "Server error",
+                statusCode: StatusCodes.Status500InternalServerError)
+        };
     }
 }
 

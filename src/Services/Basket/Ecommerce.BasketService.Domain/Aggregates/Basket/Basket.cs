@@ -48,7 +48,7 @@ public sealed class Basket : Entity
         var item = Items.SingleOrDefault(existingItem => existingItem.ProductId == productId && !existingItem.IsDeleted);
         if (item is null)
         {
-            throw new BasketDomainException("basket_item_not_found", "productId", "The requested basket item was not found.");
+            throw BasketException.Validation(BasketErrorCode.BasketItemNotFound, "productId", "The requested basket item was not found.");
         }
 
         Items.Remove(item);
@@ -59,12 +59,12 @@ public sealed class Basket : Entity
     {
         if (!IsActive)
         {
-            throw new BasketDomainException("basket_inactive", "basketId", "The basket has already been checked out.");
+            throw BasketException.Conflict(BasketErrorCode.BasketInactive, "The basket has already been checked out.");
         }
 
         if (!Items.Any(item => !item.IsDeleted))
         {
-            throw new BasketDomainException("basket_empty", "basketId", "The basket must contain at least one item before checkout.");
+            throw BasketException.Validation(BasketErrorCode.BasketEmpty, "basketId", "The basket must contain at least one item before checkout.");
         }
 
         Status = BasketStatus.CheckedOut;
@@ -89,7 +89,7 @@ public sealed class Basket : Entity
     {
         if (!IsActive)
         {
-            throw new BasketDomainException("basket_inactive", "basketId", message);
+            throw BasketException.Conflict(BasketErrorCode.BasketInactive, message);
         }
     }
 }

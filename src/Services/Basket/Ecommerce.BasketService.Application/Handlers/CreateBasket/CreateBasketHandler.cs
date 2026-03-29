@@ -15,7 +15,7 @@ public sealed class CreateBasketHandler
     {
         if (command.CustomerId == Guid.Empty)
         {
-            throw BasketValidationException.For("customerId", "Customer id is required.");
+            throw BasketException.Validation(BasketErrorCode.InvalidCustomerId, "customerId", "Customer id is required.");
         }
 
         var basket = Basket.Create(command.CustomerId);
