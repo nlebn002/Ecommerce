@@ -16,24 +16,23 @@ public static class GetBasketEndpoint
 
     private static async Task<Ok<BasketDto>> HandleAsync(
         [FromRoute] Guid basketId,
-        [FromQuery] Guid? customerId,
         IValidator<GetBasketRequest> validator,
         GetBasketHandler handler,
         CancellationToken cancellationToken)
     {
-        var request = new GetBasketRequest(basketId, customerId);
+        var request = new GetBasketRequest(basketId);
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             throw new ApiValidationException(validationResult);
         }
 
-        var basket = await handler.ExecuteAsync(new GetBasketQuery(request.BasketId, request.CustomerId), cancellationToken);
+        var basket = await handler.ExecuteAsync(new GetBasketQuery(request.BasketId), cancellationToken);
         return TypedResults.Ok(basket);
     }
 }
 
-public sealed record GetBasketRequest(Guid BasketId, Guid? CustomerId);
+public sealed record GetBasketRequest(Guid BasketId);
 
 public sealed class GetBasketRequestValidator : AbstractValidator<GetBasketRequest>
 {

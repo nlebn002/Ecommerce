@@ -15,6 +15,7 @@ public static class BasketEndpointMappings
             .WithApiVersionSet(versionSet)
             .MapToApiVersion(new ApiVersion(1, 0));
 
+        CreateBasketEndpoint.Map(group);
         GetBasketEndpoint.Map(group);
         AddOrUpdateBasketItemEndpoint.Map(group);
         RemoveBasketItemEndpoint.Map(group);

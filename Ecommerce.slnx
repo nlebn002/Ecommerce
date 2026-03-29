@@ -29,6 +29,7 @@
   <Folder Name="/tests/" />
   <Folder Name="/tests/Services/" />
   <Folder Name="/tests/Services/Basket/">
+    <Project Path="tests/Services/Basket/Ecommerce.BasketService.Application.Tests/Ecommerce.BasketService.Application.Tests.csproj" />
     <Project Path="tests/Services/Basket/Ecommerce.BasketService.Domain.Tests/Ecommerce.BasketService.Domain.Tests.csproj" />
     <Project Path="tests/Services/Basket/Ecommerce.BasketService.Infrastructure.Tests/Ecommerce.BasketService.Infrastructure.Tests.csproj" />
   </Folder>
