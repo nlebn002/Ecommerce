@@ -17,3 +17,11 @@ You are executing one repository agent.
   - Before editing files, summarize what you will create or change.
   - Then execute the tasks in order.
   - When finished, list created/updated files and any blockers.
+
+
+  Endpoints 
+   - AddOrUpdateBasketItemEndpoint
+   - GetBasketEndpoint
+   - ...
+
+   
