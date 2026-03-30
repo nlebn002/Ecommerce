@@ -8,6 +8,7 @@ var postgres = builder.AddPostgres("postgres", postgresUserName, postgresPasswor
     .WithDataBindMount(@"C:\Temp\databases\basket");
 
 var basketDb = postgres.AddDatabase("BasketDb", "basketdb");
+var orderDb = postgres.AddDatabase("OrderDb", "orderdb");
 
 var redis = builder.AddRedis("Redis");
 var messageBroker = builder.AddRabbitMQ("MessageBroker");
@@ -20,8 +21,15 @@ var basketApi = builder.AddProject<Projects.Ecommerce_BasketService_Api>("basket
     .WaitFor(redis)
     .WaitFor(messageBroker);
 
+var orderApi = builder.AddProject<Projects.Ecommerce_OrderService_Api>("order-api")
+    .WithReference(orderDb)
+    .WithReference(messageBroker)
+    .WaitFor(orderDb)
+    .WaitFor(messageBroker);
+
 builder.AddProject<Projects.Ecommerce_Gateway>("gateway")
     .WithReference(basketApi)
+    .WithReference(orderApi)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
