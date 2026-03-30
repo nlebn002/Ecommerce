@@ -1,6 +1,7 @@
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
 using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+using Ecommerce.Common.Messaging.Outbox;
 using Ecommerce.BasketService.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;

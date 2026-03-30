@@ -1,5 +1,6 @@
 using Ecommerce.BasketService.Domain;
 using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+using Ecommerce.Common.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

@@ -1,5 +1,5 @@
 using Ecommerce.BasketService.Domain;
-using Ecommerce.BasketService.Infrastructure.Persistence;
+using Ecommerce.Common.Messaging.Outbox;
 
 namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
 

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Ecommerce.BasketService.Infrastructure.Persistence;
+using Ecommerce.Common.Messaging.Outbox;
 using MassTransit;
 
 namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;

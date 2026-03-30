@@ -1,5 +1,6 @@
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Domain;
+using Ecommerce.Common.Validation;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -27,12 +28,10 @@ public static class CheckoutBasketEndpoint
             throw BasketException.Validation(
                 BasketErrorCode.RequestValidationFailed,
                 "API validation failed.",
-                validationResult.Errors
-                    .GroupBy(error => error.PropertyName, StringComparer.Ordinal)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(error => error.ErrorMessage).ToArray(),
-                        StringComparer.Ordinal));
+                ValidationErrorDictionary.Create(
+                    validationResult.Errors,
+                    error => error.PropertyName,
+                    error => error.ErrorMessage));
         }
 
         var basket = await handler.ExecuteAsync(new CheckoutBasketCommand(request.BasketId), cancellationToken);

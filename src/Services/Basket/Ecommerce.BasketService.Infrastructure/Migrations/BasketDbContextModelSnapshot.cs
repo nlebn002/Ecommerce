@@ -98,7 +98,7 @@ namespace Ecommerce.BasketService.Infrastructure.Migrations
                     b.ToTable("BasketItems");
                 });
 
-            modelBuilder.Entity("Ecommerce.BasketService.Infrastructure.Persistence.OutboxMessage", b =>
+            modelBuilder.Entity("Ecommerce.Common.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");

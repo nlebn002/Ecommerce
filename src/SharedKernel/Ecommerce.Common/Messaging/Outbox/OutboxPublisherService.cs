@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+namespace Ecommerce.Common.Messaging.Outbox;
 
 public sealed class OutboxPublisherService : BackgroundService
 {
@@ -27,14 +27,9 @@ public sealed class OutboxPublisherService : BackgroundService
         {
             try
             {
-                using var scope = _serviceScopeFactory.CreateScope();
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 var processor = scope.ServiceProvider.GetRequiredService<OutboxMessageProcessor>();
-                var processedCount = await processor.ProcessPendingMessagesAsync(_options.Value.BatchSize, stoppingToken);
-
-                if (processedCount > 0)
-                {
-                    continue;
-                }
+                await processor.ProcessPendingMessagesAsync(_options.Value.BatchSize, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -42,7 +37,7 @@ public sealed class OutboxPublisherService : BackgroundService
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Failed to process Basket outbox messages.");
+                _logger.LogError(exception, "Unhandled exception while processing outbox messages.");
             }
 
             await Task.Delay(_options.Value.PollInterval, stoppingToken);

@@ -1,14 +1,6 @@
 namespace Ecommerce.OrderService.Domain;
 
-public interface IEntity
+public interface IEntity : Ecommerce.Common.Persistence.IEntity
 {
-    Guid Id { get; }
-
-    Guid ConcurrencyToken { get; }
-
-    DateTime CreatedDate { get; }
-
-    DateTime? UpdatedDate { get; }
-
-    bool IsDeleted { get; }
+    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
 }

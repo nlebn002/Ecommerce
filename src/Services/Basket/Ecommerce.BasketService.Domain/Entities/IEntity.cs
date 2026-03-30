@@ -1,16 +1,8 @@
 namespace Ecommerce.BasketService.Domain;
 
-public interface IEntity
+public interface IEntity : Ecommerce.Common.Persistence.IEntity
 {
-    Guid Id { get; }
-
     IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
-
-    DateTime CreatedDate { get; }
-
-    DateTime? UpdatedDate { get; }
-
-    bool IsDeleted { get; }
 
     void ClearDomainEvents();
 }

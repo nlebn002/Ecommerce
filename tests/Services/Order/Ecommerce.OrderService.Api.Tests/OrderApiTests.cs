@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Ecommerce.OrderService.Api;
 using Ecommerce.OrderService.Application;
+using Ecommerce.Common.Messaging.Outbox;
 using Ecommerce.OrderService.Domain;
 using Ecommerce.OrderService.Infrastructure.Messaging.Outbox;
 using Ecommerce.OrderService.Infrastructure.Persistence;

@@ -1,6 +1,4 @@
-using Ecommerce.BasketService.Infrastructure.Persistence;
-
-namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+namespace Ecommerce.Common.Messaging.Outbox;
 
 public interface IOutboxMessagePublisher
 {

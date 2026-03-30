@@ -1,9 +1,10 @@
 using System.Text.Json;
+using Ecommerce.Common.Messaging.Outbox;
+using Ecommerce.Common.Persistence;
 using Ecommerce.OrderService.Domain;
 using Ecommerce.OrderService.Infrastructure.Messaging.IntegrationEvents;
 using Ecommerce.OrderService.Infrastructure.Messaging.Outbox;
 using Ecommerce.OrderService.Infrastructure.Persistence;
-using Ecommerce.OrderService.Infrastructure.Persistence.Interceptors;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit;

@@ -1,4 +1,5 @@
 using Ecommerce.OrderService.Application;
+using Ecommerce.Common.Validation;
 using Ecommerce.OrderService.Domain;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -27,12 +28,10 @@ public static class GetCustomerOrdersEndpoint
             throw OrderException.Validation(
                 OrderErrorCode.RequestValidationFailed,
                 "API validation failed.",
-                validationResult.Errors
-                    .GroupBy(error => error.PropertyName, StringComparer.Ordinal)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(error => error.ErrorMessage).ToArray(),
-                        StringComparer.Ordinal));
+                ValidationErrorDictionary.Create(
+                    validationResult.Errors,
+                    error => error.PropertyName,
+                    error => error.ErrorMessage));
         }
 
         var orders = await handler.ExecuteAsync(new GetCustomerOrdersQuery(request.CustomerId), cancellationToken);

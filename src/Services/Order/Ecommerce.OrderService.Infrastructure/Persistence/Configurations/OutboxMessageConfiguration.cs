@@ -1,3 +1,4 @@
+using Ecommerce.Common.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,8 +1,9 @@
 using Ecommerce.BasketService.Application;
 using Ecommerce.BasketService.Infrastructure.Persistence;
-using Ecommerce.BasketService.Infrastructure.Persistence.Interceptors;
 using Ecommerce.BasketService.Infrastructure.Messaging.IntegrationEvents;
 using Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+using Ecommerce.Common.Messaging.Outbox;
+using Ecommerce.Common.Persistence;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,7 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(basketDbConnectionString)
                 .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
         services.AddScoped<IBasketDbContext>(serviceProvider => serviceProvider.GetRequiredService<BasketDbContext>());
+        services.AddScoped<IOutboxDbContext>(serviceProvider => serviceProvider.GetRequiredService<BasketDbContext>());
         var outboxSection = configuration.GetSection(OutboxProcessorOptions.SectionName);
         services.AddOptions<OutboxProcessorOptions>()
             .Configure(options =>

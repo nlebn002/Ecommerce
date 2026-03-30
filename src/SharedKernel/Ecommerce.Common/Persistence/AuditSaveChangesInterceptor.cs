@@ -1,8 +1,7 @@
-using Ecommerce.OrderService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace Ecommerce.OrderService.Infrastructure.Persistence.Interceptors;
+namespace Ecommerce.Common.Persistence;
 
 public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {

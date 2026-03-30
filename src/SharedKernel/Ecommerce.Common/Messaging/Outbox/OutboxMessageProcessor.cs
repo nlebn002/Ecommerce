@@ -1,16 +1,15 @@
-using Ecommerce.BasketService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+namespace Ecommerce.Common.Messaging.Outbox;
 
 public sealed class OutboxMessageProcessor
 {
-    private readonly BasketDbContext _dbContext;
+    private readonly IOutboxDbContext _dbContext;
     private readonly IOutboxMessagePublisher _outboxMessagePublisher;
     private readonly TimeProvider _timeProvider;
 
     public OutboxMessageProcessor(
-        BasketDbContext dbContext,
+        IOutboxDbContext dbContext,
         IOutboxMessagePublisher outboxMessagePublisher,
         TimeProvider timeProvider)
     {
@@ -21,8 +20,6 @@ public sealed class OutboxMessageProcessor
 
     public async Task<int> ProcessPendingMessagesAsync(int batchSize, CancellationToken cancellationToken)
     {
-        // TODO: This simple polling approach is acceptable for a single-instance interview project.
-        // A distributed deployment would need a database-level claim/lock strategy to avoid duplicate publishing.
         var pendingMessages = await _dbContext.OutboxMessages
             .Where(message => message.ProcessedOnUtc == null)
             .OrderBy(message => message.OccurredOnUtc)

@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Ecommerce.OrderService.Application\Ecommerce.OrderService.Application.csproj" />
     <ProjectReference Include="..\Ecommerce.OrderService.Domain\Ecommerce.OrderService.Domain.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Common\Ecommerce.Common.csproj" />
     <ProjectReference Include="..\..\..\SharedKernel\Ecommerce.Contracts\Ecommerce.Contracts.csproj" />
   </ItemGroup>
 

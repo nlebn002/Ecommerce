@@ -1,9 +1,10 @@
 using Ecommerce.OrderService.Application;
+using Ecommerce.Common.Messaging.Outbox;
+using Ecommerce.Common.Persistence;
 using Ecommerce.OrderService.Infrastructure.Messaging.Consumers;
 using Ecommerce.OrderService.Infrastructure.Messaging.IntegrationEvents;
 using Ecommerce.OrderService.Infrastructure.Messaging.Outbox;
 using Ecommerce.OrderService.Infrastructure.Persistence;
-using Ecommerce.OrderService.Infrastructure.Persistence.Interceptors;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(orderDbConnectionString)
                 .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
         services.AddScoped<IOrderDbContext>(serviceProvider => serviceProvider.GetRequiredService<OrderDbContext>());
+        services.AddScoped<IOutboxDbContext>(serviceProvider => serviceProvider.GetRequiredService<OrderDbContext>());
 
         var outboxSection = configuration.GetSection(OutboxProcessorOptions.SectionName);
         services.AddOptions<OutboxProcessorOptions>()

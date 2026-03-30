@@ -1,12 +1,14 @@
 using Ecommerce.OrderService.Application;
 using Ecommerce.OrderService.Domain;
 using Ecommerce.OrderService.Infrastructure.Messaging.Outbox;
-using Ecommerce.OrderService.Infrastructure.Persistence.Extensions;
+using Ecommerce.Common.Messaging.Outbox;
+using Ecommerce.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
+using DomainEntity = Ecommerce.OrderService.Domain.Entity;
 
 namespace Ecommerce.OrderService.Infrastructure.Persistence;
 
-public sealed class OrderDbContext : DbContext, IOrderDbContext
+public sealed class OrderDbContext : DbContext, IOrderDbContext, IOutboxDbContext
 {
     private readonly IDomainEventOutboxMessageFactory _domainEventOutboxMessageFactory;
 
@@ -33,7 +35,7 @@ public sealed class OrderDbContext : DbContext, IOrderDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var entitiesWithDomainEvents = ChangeTracker.Entries<Entity>()
+        var entitiesWithDomainEvents = ChangeTracker.Entries<DomainEntity>()
             .Select(entry => entry.Entity)
             .Where(entity => entity.DomainEvents.Count > 0)
             .ToArray();

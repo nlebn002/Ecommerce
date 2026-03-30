@@ -1,8 +1,8 @@
-namespace Ecommerce.BasketService.Infrastructure.Messaging.Outbox;
+namespace Ecommerce.Common.Messaging.Outbox;
 
 public sealed class OutboxProcessorOptions
 {
-    public const string SectionName = "Basket:Outbox";
+    public const string SectionName = "Outbox";
 
     public int BatchSize { get; set; } = 20;
 

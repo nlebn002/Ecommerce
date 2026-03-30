@@ -114,7 +114,7 @@ namespace Ecommerce.OrderService.Infrastructure.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("Ecommerce.OrderService.Infrastructure.Persistence.OutboxMessage", b =>
+            modelBuilder.Entity("Ecommerce.Common.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

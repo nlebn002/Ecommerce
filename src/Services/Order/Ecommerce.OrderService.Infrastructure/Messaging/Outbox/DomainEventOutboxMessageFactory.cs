@@ -1,7 +1,7 @@
 using System.Text.Json;
+using Ecommerce.Common.Messaging.Outbox;
 using Ecommerce.OrderService.Domain;
 using Ecommerce.OrderService.Infrastructure.Messaging.IntegrationEvents;
-using Ecommerce.OrderService.Infrastructure.Persistence;
 
 namespace Ecommerce.OrderService.Infrastructure.Messaging.Outbox;
 

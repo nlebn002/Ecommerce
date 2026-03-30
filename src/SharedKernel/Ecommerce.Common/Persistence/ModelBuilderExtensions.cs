@@ -1,10 +1,9 @@
 using System.Linq.Expressions;
-using Ecommerce.BasketService.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ecommerce.BasketService.Infrastructure.Persistence.Extensions;
+namespace Ecommerce.Common.Persistence;
 
-internal static class ModelBuilderExtensions
+public static class ModelBuilderExtensions
 {
     public static void ApplyAuditPropertyConventions(this ModelBuilder modelBuilder)
     {
@@ -15,20 +14,10 @@ internal static class ModelBuilderExtensions
                 continue;
             }
 
-            modelBuilder.Entity(entityType.ClrType)
-                .Property(nameof(Entity.CreatedDate))
-                .IsRequired();
-
-            modelBuilder.Entity(entityType.ClrType)
-                .Property(nameof(Entity.UpdatedDate));
-
-            modelBuilder.Entity(entityType.ClrType)
-                .Property(nameof(Entity.IsDeleted))
-                .IsRequired();
-
-            modelBuilder.Entity(entityType.ClrType)
-                .Property(nameof(Entity.ConcurrencyToken))
-                .IsConcurrencyToken();
+            modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.CreatedDate)).IsRequired();
+            modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.UpdatedDate));
+            modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.IsDeleted)).IsRequired();
+            modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.ConcurrencyToken)).IsConcurrencyToken();
         }
     }
 
