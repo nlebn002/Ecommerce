@@ -5,9 +5,9 @@ You are executing one repository agent.
   - .agents/shared/project-structure.md
   - .agents/shared/tech-stack.md
   - .agents/shared/coding-standards.md
-  - .agents/02-basket/system-prompt.md
-  - .agents/02-basket/context.md
-  - .agents/02-basket/tasks.md
+  - .agents/services/service-template-rules.md
+  - .agents/services/order-service.md
+
 
   Instructions:
   - Follow the shared files as the source of truth.
@@ -17,11 +17,3 @@ You are executing one repository agent.
   - Before editing files, summarize what you will create or change.
   - Then execute the tasks in order.
   - When finished, list created/updated files and any blockers.
-
-
-  Endpoints 
-   - AddOrUpdateBasketItemEndpoint
-   - GetBasketEndpoint
-   - ...
-
-   

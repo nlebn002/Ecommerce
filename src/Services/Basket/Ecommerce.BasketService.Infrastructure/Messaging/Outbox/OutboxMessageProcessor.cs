@@ -21,6 +21,8 @@ public sealed class OutboxMessageProcessor
 
     public async Task<int> ProcessPendingMessagesAsync(int batchSize, CancellationToken cancellationToken)
     {
+        // TODO: This simple polling approach is acceptable for a single-instance interview project.
+        // A distributed deployment would need a database-level claim/lock strategy to avoid duplicate publishing.
         var pendingMessages = await _dbContext.OutboxMessages
             .Where(message => message.ProcessedOnUtc == null)
             .OrderBy(message => message.OccurredOnUtc)
