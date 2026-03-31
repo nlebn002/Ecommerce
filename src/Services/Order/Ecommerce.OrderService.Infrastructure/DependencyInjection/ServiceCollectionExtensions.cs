@@ -45,6 +45,11 @@ public static class ServiceCollectionExtensions
                 {
                     options.PollInterval = pollInterval;
                 }
+
+                if (int.TryParse(outboxSection["MaxRetryAttempts"], out var maxRetryAttempts) && maxRetryAttempts > 0)
+                {
+                    options.MaxRetryAttempts = maxRetryAttempts;
+                }
             });
 
         services.AddMassTransit(bus =>

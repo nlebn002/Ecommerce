@@ -22,6 +22,8 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.Property(message => message.OccurredOnUtc)
             .IsRequired();
 
+        builder.Property(message => message.DiscardedOnUtc);
+
         builder.Property(message => message.LastError);
 
         builder.Property(message => message.AttemptCount)

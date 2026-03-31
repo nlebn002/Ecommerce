@@ -7,4 +7,6 @@ public sealed class OutboxProcessorOptions
     public int BatchSize { get; set; } = 20;
 
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+    public int MaxRetryAttempts { get; set; } = 3;
 }

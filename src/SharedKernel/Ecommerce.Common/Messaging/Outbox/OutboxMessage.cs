@@ -24,6 +24,8 @@ public class OutboxMessage
 
     public DateTime? ProcessedOnUtc { get; protected set; }
 
+    public DateTime? DiscardedOnUtc { get; protected set; }
+
     public string? LastError { get; protected set; }
 
     public int AttemptCount { get; protected set; }
@@ -36,12 +38,18 @@ public class OutboxMessage
     public void MarkProcessed(DateTime processedOnUtc)
     {
         ProcessedOnUtc = processedOnUtc;
+        DiscardedOnUtc = null;
         LastError = null;
     }
 
-    public void MarkFailed(string error)
+    public void MarkFailed(string error, int maxRetryAttempts, DateTime failedOnUtc)
     {
         AttemptCount++;
         LastError = error;
+
+        if (AttemptCount >= maxRetryAttempts)
+        {
+            DiscardedOnUtc = failedOnUtc;
+        }
     }
 }

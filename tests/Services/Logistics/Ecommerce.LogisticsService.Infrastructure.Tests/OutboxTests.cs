@@ -7,6 +7,7 @@ using Ecommerce.LogisticsService.Infrastructure.Messaging.Outbox;
 using Ecommerce.LogisticsService.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Ecommerce.LogisticsService.Infrastructure.Tests;
@@ -52,13 +53,37 @@ public sealed class OutboxTests
         await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_PublishesAndMarksProcessed), timeProvider);
         dbContext.OutboxMessages.Add(OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.ShipmentReservedV1, "{}", timeProvider.UtcNow.UtcDateTime));
         await dbContext.SaveChangesAsync();
-        var processor = new OutboxMessageProcessor(dbContext, publisher, timeProvider);
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
 
         var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
 
         processedCount.Should().Be(1);
         publisher.PublishedMessageIds.Should().ContainSingle();
         (await dbContext.OutboxMessages.SingleAsync()).ProcessedOnUtc.Should().Be(timeProvider.UtcNow.UtcDateTime);
+    }
+
+    [Fact]
+    public async Task ProcessPendingMessagesAsync_WhenPublishFailsAtMaxRetry_DiscardsMessage()
+    {
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 30, 16, 15, 0, TimeSpan.Zero));
+        var publisher = new FakeOutboxMessagePublisher(shouldThrow: true);
+        await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_WhenPublishFailsAtMaxRetry_DiscardsMessage), timeProvider);
+        var message = OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.ShipmentReservedV1, "{}", timeProvider.UtcNow.UtcDateTime);
+        message.MarkFailed("previous failure", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-2));
+        message.MarkFailed("previous failure", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-1));
+        dbContext.OutboxMessages.Add(message);
+        await dbContext.SaveChangesAsync();
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
+
+        var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
+
+        processedCount.Should().Be(0);
+
+        var persistedMessage = await dbContext.OutboxMessages.SingleAsync();
+        persistedMessage.ProcessedOnUtc.Should().BeNull();
+        persistedMessage.DiscardedOnUtc.Should().Be(timeProvider.UtcNow.UtcDateTime);
+        persistedMessage.AttemptCount.Should().Be(3);
+        persistedMessage.LastError.Should().Contain("Simulated broker failure");
     }
 
     private static LogisticsDbContext CreateDbContext(string databaseName, TimeProvider timeProvider)
@@ -71,12 +96,34 @@ public sealed class OutboxTests
         return new LogisticsDbContext(options, new DomainEventOutboxMessageFactory(new LogisticsIntegrationEventFactory(timeProvider), timeProvider));
     }
 
+    private static IOptions<OutboxProcessorOptions> CreateOptions(int maxRetryAttempts = 3)
+    {
+        return Options.Create(new OutboxProcessorOptions
+        {
+            BatchSize = 20,
+            PollInterval = TimeSpan.FromSeconds(5),
+            MaxRetryAttempts = maxRetryAttempts
+        });
+    }
+
     private sealed class FakeOutboxMessagePublisher : IOutboxMessagePublisher
     {
+        private readonly bool _shouldThrow;
+
+        public FakeOutboxMessagePublisher(bool shouldThrow = false)
+        {
+            _shouldThrow = shouldThrow;
+        }
+
         public List<Guid> PublishedMessageIds { get; } = [];
 
         public Task PublishAsync(OutboxMessage outboxMessage, CancellationToken cancellationToken)
         {
+            if (_shouldThrow)
+            {
+                throw new InvalidOperationException("Simulated broker failure");
+            }
+
             PublishedMessageIds.Add(outboxMessage.Id);
             return Task.CompletedTask;
         }

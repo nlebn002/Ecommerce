@@ -7,6 +7,7 @@ using Ecommerce.Common.Messaging.Outbox;
 using Ecommerce.Common.Persistence;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Ecommerce.BasketService.Infrastructure.Tests;
@@ -36,6 +37,7 @@ public sealed class OutboxTests
 
         outboxMessages.Should().HaveCount(2);
         outboxMessages.Should().OnlyContain(message =>
+            message.DiscardedOnUtc == null &&
             message.ProcessedOnUtc == null &&
             message.AttemptCount == 0 &&
             message.OccurredOnUtc == timeProvider.UtcNow.UtcDateTime);
@@ -79,7 +81,7 @@ public sealed class OutboxTests
         await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_PublishesAndMarksMessagesProcessed), timeProvider);
         dbContext.OutboxMessages.Add(OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.BasketCheckedOutV1, "{}", timeProvider.UtcNow.UtcDateTime));
         await dbContext.SaveChangesAsync();
-        var processor = new OutboxMessageProcessor(dbContext, publisher, timeProvider);
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
 
         var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
 
@@ -88,19 +90,20 @@ public sealed class OutboxTests
 
         var persistedMessage = await dbContext.OutboxMessages.SingleAsync();
         persistedMessage.ProcessedOnUtc.Should().Be(timeProvider.UtcNow.UtcDateTime);
+        persistedMessage.DiscardedOnUtc.Should().BeNull();
         persistedMessage.AttemptCount.Should().Be(0);
         persistedMessage.LastError.Should().BeNull();
     }
 
     [Fact]
-    public async Task ProcessPendingMessagesAsync_WhenPublishFails_KeepsMessagePending()
+    public async Task ProcessPendingMessagesAsync_WhenPublishFailsBelowMaxRetry_KeepsMessagePending()
     {
         var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 29, 11, 30, 0, TimeSpan.Zero));
         var publisher = new FakeOutboxMessagePublisher(shouldThrow: true);
-        await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_WhenPublishFails_KeepsMessagePending), timeProvider);
+        await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_WhenPublishFailsBelowMaxRetry_KeepsMessagePending), timeProvider);
         dbContext.OutboxMessages.Add(OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.BasketCheckedOutV1, "{}", timeProvider.UtcNow.UtcDateTime));
         await dbContext.SaveChangesAsync();
-        var processor = new OutboxMessageProcessor(dbContext, publisher, timeProvider);
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
 
         var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
 
@@ -108,8 +111,54 @@ public sealed class OutboxTests
 
         var persistedMessage = await dbContext.OutboxMessages.SingleAsync();
         persistedMessage.ProcessedOnUtc.Should().BeNull();
+        persistedMessage.DiscardedOnUtc.Should().BeNull();
         persistedMessage.AttemptCount.Should().Be(1);
         persistedMessage.LastError.Should().Contain("Simulated broker failure");
+    }
+
+    [Fact]
+    public async Task ProcessPendingMessagesAsync_WhenPublishFailsAtMaxRetry_DiscardsMessage()
+    {
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 29, 11, 45, 0, TimeSpan.Zero));
+        var publisher = new FakeOutboxMessagePublisher(shouldThrow: true);
+        await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_WhenPublishFailsAtMaxRetry_DiscardsMessage), timeProvider);
+        var message = OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.BasketCheckedOutV1, "{}", timeProvider.UtcNow.UtcDateTime);
+        message.MarkFailed("previous failure", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-1));
+        message.MarkFailed("previous failure", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-1));
+        dbContext.OutboxMessages.Add(message);
+        await dbContext.SaveChangesAsync();
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
+
+        var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
+
+        processedCount.Should().Be(0);
+
+        var persistedMessage = await dbContext.OutboxMessages.SingleAsync();
+        persistedMessage.ProcessedOnUtc.Should().BeNull();
+        persistedMessage.DiscardedOnUtc.Should().Be(timeProvider.UtcNow.UtcDateTime);
+        persistedMessage.AttemptCount.Should().Be(3);
+        persistedMessage.LastError.Should().Contain("Simulated broker failure");
+    }
+
+    [Fact]
+    public async Task ProcessPendingMessagesAsync_SkipsDiscardedMessages()
+    {
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2026, 3, 29, 12, 0, 0, TimeSpan.Zero));
+        var publisher = new FakeOutboxMessagePublisher();
+        await using var dbContext = CreateDbContext(nameof(ProcessPendingMessagesAsync_SkipsDiscardedMessages), timeProvider);
+        var discardedMessage = OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.BasketCheckedOutV1, "{}", timeProvider.UtcNow.UtcDateTime.AddMinutes(-5));
+        discardedMessage.MarkFailed("failure one", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-4));
+        discardedMessage.MarkFailed("failure two", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-3));
+        discardedMessage.MarkFailed("failure three", 3, timeProvider.UtcNow.UtcDateTime.AddMinutes(-2));
+        var pendingMessage = OutboxMessage.Create(Guid.NewGuid(), OutboxMessageTypes.BasketCheckedOutV1, "{}", timeProvider.UtcNow.UtcDateTime);
+        dbContext.OutboxMessages.AddRange(discardedMessage, pendingMessage);
+        await dbContext.SaveChangesAsync();
+        var processor = new OutboxMessageProcessor(dbContext, publisher, CreateOptions(), timeProvider);
+
+        var processedCount = await processor.ProcessPendingMessagesAsync(10, CancellationToken.None);
+
+        processedCount.Should().Be(1);
+        publisher.PublishedMessageIds.Should().ContainSingle().Which.Should().Be(pendingMessage.Id);
     }
 
     [Fact]
@@ -197,6 +246,16 @@ public sealed class OutboxTests
             timeProvider);
 
         return new BasketDbContext(options, outboxFactory);
+    }
+
+    private static IOptions<OutboxProcessorOptions> CreateOptions(int maxRetryAttempts = 3)
+    {
+        return Options.Create(new OutboxProcessorOptions
+        {
+            BatchSize = 20,
+            PollInterval = TimeSpan.FromSeconds(5),
+            MaxRetryAttempts = maxRetryAttempts
+        });
     }
 
     private sealed class FakeOutboxMessagePublisher : IOutboxMessagePublisher
