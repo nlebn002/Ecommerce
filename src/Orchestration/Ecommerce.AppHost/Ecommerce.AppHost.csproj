@@ -12,7 +12,6 @@
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
-    <PackageReference Include="Aspire.Hosting.Redis" />
     <ProjectReference Include="..\..\Gateway\Ecommerce.Gateway\Ecommerce.Gateway.csproj" />
     <ProjectReference Include="..\..\Services\Basket\Ecommerce.BasketService.Api\Ecommerce.BasketService.Api.csproj" />
     <ProjectReference Include="..\..\Services\Logistics\Ecommerce.LogisticsService.Api\Ecommerce.LogisticsService.Api.csproj" />

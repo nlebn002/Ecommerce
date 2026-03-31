@@ -28,17 +28,6 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  redis:
-    image: redis:7
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-      start_period: 5s
-    ports:
-      - "6379:6379"
-
   basket-api:
     build:
       context: .
@@ -47,7 +36,6 @@ services:
       ASPNETCORE_ENVIRONMENT: Compose
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__BasketDb: Host=postgres;Port=5432;Database=basketdb;Username=ecommerce;Password=ecommerce
-      ConnectionStrings__Redis: redis:6379
       ConnectionStrings__MessageBroker: rabbitmq://guest:guest@rabbitmq:5672
     ports:
       - "5020:8080"
@@ -55,8 +43,6 @@ services:
       postgres:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy
-      redis:
         condition: service_healthy
 
   order-api:
