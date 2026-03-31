@@ -11,3 +11,13 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: ["basket-api:8080"]
+
+  - job_name: order-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["order-api:8080"]
+
+  - job_name: logistics-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["logistics-api:8080"]
