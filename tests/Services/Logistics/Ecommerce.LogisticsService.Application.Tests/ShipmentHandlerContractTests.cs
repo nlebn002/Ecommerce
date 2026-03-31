@@ -27,6 +27,27 @@ public sealed class ShipmentHandlerContractTests
     }
 
     [Fact]
+    public async Task ReserveShipmentForOrderHandler_WhenOrderCreatedIsReplayed_ReturnsExistingShipment()
+    {
+        await using var dbContext = CreateDbContext(nameof(ReserveShipmentForOrderHandler_WhenOrderCreatedIsReplayed_ReturnsExistingShipment));
+        var handler = new ReserveShipmentForOrderHandler(dbContext);
+        var orderId = Guid.NewGuid();
+
+        var firstShipment = await handler.ExecuteAsync(
+            new ReserveShipmentForOrderCommand(orderId, Guid.NewGuid(), Guid.NewGuid()),
+            CancellationToken.None);
+
+        var replayedShipment = await handler.ExecuteAsync(
+            new ReserveShipmentForOrderCommand(orderId, Guid.NewGuid(), Guid.NewGuid()),
+            CancellationToken.None);
+
+        replayedShipment.Id.Should().Be(firstShipment.Id);
+        replayedShipment.OrderId.Should().Be(firstShipment.OrderId);
+        replayedShipment.Status.Should().Be(firstShipment.Status);
+        (await dbContext.Shipments.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetShipmentHandler_WhenMissing_ThrowsNotFound()
     {
         await using var dbContext = CreateDbContext(nameof(GetShipmentHandler_WhenMissing_ThrowsNotFound));

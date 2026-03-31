@@ -1,4 +1,5 @@
 using Ecommerce.LogisticsService.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.LogisticsService.Application;
 
@@ -13,9 +14,30 @@ public sealed class ReserveShipmentForOrderHandler
 
     public async Task<ShipmentDetailsDto> ExecuteAsync(ReserveShipmentForOrderCommand command, CancellationToken cancellationToken)
     {
+        var existingShipment = await _dbContext.GetShipmentByOrderIdAsync(command.OrderId, cancellationToken);
+        if (existingShipment is not null)
+        {
+            return existingShipment.ToDetailsDto();
+        }
+
         var shipment = Shipment.CreateForOrder(command.OrderId, command.CorrelationId, command.CausationId);
         _dbContext.Shipments.Add(shipment);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            existingShipment = await _dbContext.GetShipmentByOrderIdAsync(command.OrderId, cancellationToken);
+            if (existingShipment is not null)
+            {
+                return existingShipment.ToDetailsDto();
+            }
+
+            throw;
+        }
+
         return shipment.ToDetailsDto();
     }
 }
