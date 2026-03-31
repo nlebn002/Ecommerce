@@ -19,6 +19,18 @@ public sealed class ConfirmOrderHandler
             throw OrderException.NotFound(OrderErrorCode.OrderNotFound, "The order was not found.");
         }
 
+        if (order.Status == OrderStatus.Confirmed)
+        {
+            if (order.ShippingPrice == command.ShippingPrice)
+            {
+                return order.ToDetailsDto();
+            }
+
+            throw OrderException.Conflict(
+                OrderErrorCode.InvalidOrderState,
+                "The order is already confirmed with a different shipping price.");
+        }
+
         order.Confirm(command.ShippingPrice, command.CorrelationId, command.CausationId);
         await _dbContext.SaveChangesAsync(cancellationToken);
 

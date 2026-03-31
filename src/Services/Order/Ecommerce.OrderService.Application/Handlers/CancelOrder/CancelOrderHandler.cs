@@ -19,6 +19,18 @@ public sealed class CancelOrderHandler
             throw OrderException.NotFound(OrderErrorCode.OrderNotFound, "The order was not found.");
         }
 
+        if (order.Status == OrderStatus.Cancelled)
+        {
+            if (string.Equals(order.CancellationReason, command.Reason, StringComparison.Ordinal))
+            {
+                return order.ToDetailsDto();
+            }
+
+            throw OrderException.Conflict(
+                OrderErrorCode.InvalidOrderState,
+                "The order is already cancelled with a different reason.");
+        }
+
         order.Cancel(command.Reason, command.CorrelationId, command.CausationId);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
