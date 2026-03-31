@@ -23,15 +23,5 @@ public static class BasketEndpointMappings
 
         return endpoints;
     }
-
-    public static IEndpointRouteBuilder MapBasketDevelopmentEndpoints(this IEndpointRouteBuilder endpoints)
-    {
-        if (endpoints.ServiceProvider.GetRequiredService<IHostEnvironment>().IsDevelopment())
-        {
-            SeedBasketDevDataEndpoint.Map(endpoints);
-        }
-
-        return endpoints;
-    }
 }
 

@@ -21,7 +21,7 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<AssemblyReference>();
 builder.Services.AddBasketApplication();
 builder.Services.AddBasketInfrastructure(builder.Configuration);
 builder.Services.AddApiVersioning(options =>
@@ -38,7 +38,6 @@ app.MapOpenApi();
 app.MapScalarApiReference("/scalar");
 app.MapGet("/", () => Results.Ok(new { service = "basket-api", status = "ok" }));
 app.MapBasketEndpoints();
-app.MapBasketDevelopmentEndpoints();
 app.MapDefaultEndpoints();
 
 app.Run();

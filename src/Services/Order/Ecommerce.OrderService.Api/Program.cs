@@ -21,7 +21,7 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<AssemblyReference>();
 builder.Services.AddOrderApplication();
 builder.Services.AddOrderInfrastructure(builder.Configuration);
 builder.Services.AddApiVersioning(options =>
@@ -42,4 +42,3 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-public partial class Program;
