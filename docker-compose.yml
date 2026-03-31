@@ -30,7 +30,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__BasketDb: Host=postgres;Port=5432;Database=basketdb;Username=ecommerce;Password=ecommerce
       ConnectionStrings__Redis: redis:6379
-      MessageBroker__Host: rabbitmq
+      ConnectionStrings__MessageBroker: rabbitmq://guest:guest@rabbitmq:5672
     ports:
       - "5020:8080"
     depends_on:
