@@ -1,8 +1,10 @@
 using Asp.Versioning;
 using Ecommerce.BasketService.Api;
 using Ecommerce.BasketService.Application;
+using Ecommerce.BasketService.Infrastructure.Persistence;
 using Ecommerce.BasketService.Infrastructure.DependencyInjection;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -33,6 +35,8 @@ builder.Services.AddApiVersioning(options =>
 
 var app = builder.Build();
 
+await ApplyMigrationsAsync<BasketDbContext>(app.Services);
+
 app.UseExceptionHandler();
 app.MapOpenApi();
 app.MapScalarApiReference("/scalar");
@@ -41,4 +45,13 @@ app.MapBasketEndpoints();
 app.MapDefaultEndpoints();
 
 app.Run();
+
+static async Task ApplyMigrationsAsync<TDbContext>(IServiceProvider services)
+    where TDbContext : DbContext
+{
+    await using var scope = services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+}
 

@@ -2,7 +2,9 @@ using Asp.Versioning;
 using Ecommerce.LogisticsService.Api;
 using Ecommerce.LogisticsService.Application;
 using Ecommerce.LogisticsService.Infrastructure.DependencyInjection;
+using Ecommerce.LogisticsService.Infrastructure.Persistence;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -33,6 +35,8 @@ builder.Services.AddApiVersioning(options =>
 
 var app = builder.Build();
 
+await ApplyMigrationsAsync<LogisticsDbContext>(app.Services);
+
 app.UseExceptionHandler();
 app.MapOpenApi();
 app.MapScalarApiReference("/scalar");
@@ -42,3 +46,11 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
+static async Task ApplyMigrationsAsync<TDbContext>(IServiceProvider services)
+    where TDbContext : DbContext
+{
+    await using var scope = services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+}
