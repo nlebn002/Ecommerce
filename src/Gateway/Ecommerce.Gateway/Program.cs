@@ -1,15 +1,21 @@
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Net;
+using System.Net.Http;
 using System.Threading.RateLimiting;
+using Yarp.ReverseProxy.Forwarder;
 
 var builder = WebApplication.CreateBuilder(args);
 var serviceOpenApiEndpoints = builder.Configuration.GetSection("ServiceOpenApiEndpoints");
+var frontendDevServerBaseUrl = builder.Configuration["FrontendDevServer:BaseUrl"] ?? "http://127.0.0.1:4200";
 
 builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpForwarder();
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("gateway", limiterOptions =>
@@ -23,14 +29,56 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
     .AddServiceDiscoveryDestinationResolver();
+builder.Services.AddSingleton(new ForwarderRequestConfig
+{
+    ActivityTimeout = TimeSpan.FromSeconds(30)
+});
+builder.Services.AddSingleton<HttpMessageInvoker>(_ => new HttpMessageInvoker(new SocketsHttpHandler
+{
+    UseCookies = false,
+    UseProxy = false,
+    AllowAutoRedirect = false,
+    AutomaticDecompression = DecompressionMethods.None
+}));
+builder.Services.AddSingleton(new FrontendDevServerProbe(frontendDevServerBaseUrl));
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseRateLimiter();
+app.Map("/console", consoleApp =>
+{
+    consoleApp.Run(async context =>
+    {
+        var probe = context.RequestServices.GetRequiredService<FrontendDevServerProbe>();
+        if (!await probe.IsAvailableAsync(context.RequestAborted))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
+        var forwarder = context.RequestServices.GetRequiredService<IHttpForwarder>();
+        var httpClient = context.RequestServices.GetRequiredService<HttpMessageInvoker>();
+        var requestConfig = context.RequestServices.GetRequiredService<ForwarderRequestConfig>();
+        var error = await forwarder.SendAsync(context, frontendDevServerBaseUrl, httpClient, requestConfig);
+
+        if (error == ForwarderError.None)
+        {
+            return;
+        }
+
+        var errorFeature = context.GetForwarderErrorFeature();
+        app.Logger.LogWarning(errorFeature?.Exception, "Angular dev server proxy failed. Falling back to static console files.");
+
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+        }
+    });
+});
 app.UseStaticFiles();
 app.MapOpenApi();
-app.MapGet("/console", () => Results.Redirect("/console/index.html", permanent: false));
+app.MapGet("/console", () => Results.Redirect("/console/", permanent: false));
 app.MapGet("/scalar-docs/order/{documentName}.json", (
     string documentName,
     IHttpClientFactory httpClientFactory,
@@ -76,6 +124,7 @@ app.MapScalarApiReference("/scalar", options =>
     options.AddDocument("logistics-api", "Logistics API", "/scalar-docs/logistics/v1.json", true);
 });
 app.MapGet("/", () => Results.Ok(new { service = "gateway", status = "ok" }));
+app.MapFallbackToFile("/console/{*path:nonfile}", "console/index.html");
 app.MapReverseProxy().RequireRateLimiting("gateway");
 app.MapDefaultEndpoints();
 
@@ -132,4 +181,50 @@ static async Task<IResult> GetServiceOpenApiDocumentAsync(
     });
 
     return Results.Text(root.ToJsonString(new JsonSerializerOptions(JsonSerializerDefaults.Web)), "application/json");
+}
+
+sealed class FrontendDevServerProbe(string baseUrl)
+{
+    private readonly string _healthUrl = $"{baseUrl.TrimEnd('/')}/console/";
+    private readonly Lock _lock = new();
+    private DateTimeOffset _checkedAt = DateTimeOffset.MinValue;
+    private bool _isAvailable;
+
+    public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        lock (_lock)
+        {
+            if (now - _checkedAt < TimeSpan.FromSeconds(2))
+            {
+                return _isAvailable;
+            }
+        }
+
+        using var httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMilliseconds(400)
+        };
+
+        var available = false;
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, _healthUrl);
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            available = (int)response.StatusCode < 500;
+        }
+        catch
+        {
+            available = false;
+        }
+
+        lock (_lock)
+        {
+            _checkedAt = now;
+            _isAvailable = available;
+        }
+
+        return available;
+    }
 }
