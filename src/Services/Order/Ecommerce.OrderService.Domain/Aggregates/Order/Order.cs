@@ -6,16 +6,19 @@ public sealed class Order : Entity
     {
     }
 
-    private Order(Guid id, Guid customerId, IReadOnlyCollection<OrderItem> items, decimal itemsTotal)
+    private Order(Guid id, Guid customerId, IReadOnlyCollection<OrderItem> items, decimal itemsTotal, Guid checkoutCorrelationId)
     {
         Id = id;
         CustomerId = customerId;
         Items = items.ToList();
         ItemsTotal = itemsTotal;
         FinalTotal = itemsTotal;
+        CheckoutCorrelationId = checkoutCorrelationId;
     }
 
     public Guid CustomerId { get; private set; }
+
+    public Guid CheckoutCorrelationId { get; private set; }
 
     public OrderStatus Status { get; private set; } = OrderStatus.Pending;
 
@@ -56,7 +59,7 @@ public sealed class Order : Entity
             .Select(item => OrderItem.Create(orderId, item.ProductId, item.ProductName, item.Quantity, item.UnitPrice))
             .ToArray();
 
-        var order = new Order(orderId, customerId, orderItems, itemsTotal);
+        var order = new Order(orderId, customerId, orderItems, itemsTotal, correlationId);
         order.RaiseDomainEvent(new OrderCreatedDomainEvent(
             order.Id,
             order.CustomerId,

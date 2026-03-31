@@ -32,6 +32,37 @@ public sealed class OrderHandlerContractTests
     }
 
     [Fact]
+    public async Task CreateOrderFromBasketCheckoutHandler_WhenCheckoutIsReplayed_ReturnsExistingOrder()
+    {
+        await using var dbContext = CreateDbContext(nameof(CreateOrderFromBasketCheckoutHandler_WhenCheckoutIsReplayed_ReturnsExistingOrder));
+        var handler = new CreateOrderFromBasketCheckoutHandler(dbContext);
+        var correlationId = Guid.NewGuid();
+
+        var firstOrder = await handler.ExecuteAsync(
+            new CreateOrderFromBasketCheckoutCommand(
+                Guid.NewGuid(),
+                [new CreateOrderLineItem(Guid.NewGuid(), "Keyboard", 2, 25m)],
+                50m,
+                correlationId,
+                Guid.NewGuid()),
+            CancellationToken.None);
+
+        var replayedOrder = await handler.ExecuteAsync(
+            new CreateOrderFromBasketCheckoutCommand(
+                Guid.NewGuid(),
+                [new CreateOrderLineItem(Guid.NewGuid(), "Mouse", 1, 10m)],
+                10m,
+                correlationId,
+                Guid.NewGuid()),
+            CancellationToken.None);
+
+        replayedOrder.OrderId.Should().Be(firstOrder.OrderId);
+        replayedOrder.CustomerId.Should().Be(firstOrder.CustomerId);
+        replayedOrder.ItemsTotal.Should().Be(firstOrder.ItemsTotal);
+        (await dbContext.Orders.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetOrderHandler_WhenMissing_ThrowsNotFound()
     {
         await using var dbContext = CreateDbContext(nameof(GetOrderHandler_WhenMissing_ThrowsNotFound));

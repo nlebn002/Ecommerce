@@ -31,6 +31,9 @@ namespace Ecommerce.OrderService.Infrastructure.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
+                    b.Property<Guid>("CheckoutCorrelationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ConcurrencyToken")
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
@@ -64,6 +67,9 @@ namespace Ecommerce.OrderService.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CheckoutCorrelationId")
+                        .IsUnique();
 
                     b.ToTable("Orders");
                 });
