@@ -28,7 +28,9 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseRateLimiter();
+app.UseStaticFiles();
 app.MapOpenApi();
+app.MapGet("/console", () => Results.Redirect("/console/index.html", permanent: false));
 app.MapGet("/scalar-docs/order/{documentName}.json", (
     string documentName,
     IHttpClientFactory httpClientFactory,

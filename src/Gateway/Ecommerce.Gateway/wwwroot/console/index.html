@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ecommerce Test Console</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f3efe7;
+            --panel: #fffdf8;
+            --ink: #1d2a33;
+            --muted: #5f6c75;
+            --line: #d9d2c5;
+            --accent: #c45b30;
+            --accent-strong: #9d431f;
+            --good: #2f7d4a;
+            --bad: #a33434;
+            --shadow: 0 18px 40px rgba(45, 33, 19, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(196, 91, 48, 0.12), transparent 30%),
+                linear-gradient(180deg, #f6f1e8 0%, var(--bg) 100%);
+            color: var(--ink);
+        }
+
+        main {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .hero {
+            display: grid;
+            gap: 12px;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(255, 253, 248, 0.88);
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .panel {
+            display: grid;
+            gap: 14px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .panel-header {
+            display: grid;
+            gap: 6px;
+        }
+
+        .fields {
+            display: grid;
+            gap: 10px;
+        }
+
+        .field-row {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        input, textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font: inherit;
+            color: var(--ink);
+            background: #fff;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            appearance: none;
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font: inherit;
+            cursor: pointer;
+            color: #fff;
+            background: var(--accent);
+            transition: transform 120ms ease, background 120ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            background: var(--accent-strong);
+        }
+
+        button.secondary {
+            background: #6f7b84;
+        }
+
+        button.ghost {
+            background: #e8e0d2;
+            color: var(--ink);
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f0e9dc;
+            color: var(--ink);
+            font-size: 0.9rem;
+        }
+
+        .status {
+            font-weight: 600;
+        }
+
+        .status.ok {
+            color: var(--good);
+        }
+
+        .status.error {
+            color: var(--bad);
+        }
+
+        pre {
+            margin: 0;
+            padding: 14px;
+            border-radius: 14px;
+            background: #201a17;
+            color: #f8f4ec;
+            overflow: auto;
+            min-height: 240px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 720px) {
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <section class="hero">
+        <h1>Gateway Test Console</h1>
+        <p>Drive basket, order, and logistics flows through the gateway to generate realistic metrics and traces.</p>
+        <div class="pill-row">
+            <span class="pill">Gateway base <strong id="gateway-base"></strong></span>
+            <span class="pill">Customer <strong id="customer-pill"></strong></span>
+            <span class="pill">Basket <strong id="basket-pill">not set</strong></span>
+            <span class="pill">Order <strong id="order-pill">not set</strong></span>
+            <span class="pill">Shipment <strong id="shipment-pill">not set</strong></span>
+        </div>
+    </section>
+
+    <section class="grid">
+        <article class="panel">
+            <div class="panel-header">
+                <h2>Basket</h2>
+                <p>Create a basket and mutate it through the gateway.</p>
+            </div>
+
+            <div class="fields">
+                <div class="field-row">
+                    <label>
+                        Customer Id
+                        <input id="customer-id" type="text">
+                    </label>
+                    <label>
+                        Basket Id
+                        <input id="basket-id" type="text">
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>
+                        Product Id
+                        <input id="product-id" type="text">
+                    </label>
+                    <label>
+                        Product Name
+                        <input id="product-name" type="text">
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label>
+                        Quantity
+                        <input id="quantity" type="number" min="1" step="1" value="1">
+                    </label>
+                    <label>
+                        Unit Price
+                        <input id="unit-price" type="number" min="0" step="0.01" value="19.99">
+                    </label>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="generate-customer">New Customer</button>
+                <button id="generate-product" class="secondary">Random Item</button>
+                <button id="create-basket">Create Basket</button>
+                <button id="get-basket" class="secondary">Get Basket</button>
+                <button id="upsert-item">Add Or Update Item</button>
+                <button id="remove-item" class="secondary">Remove Item</button>
+                <button id="checkout-basket">Checkout</button>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-header">
+                <h2>Order</h2>
+                <p>Inspect the order produced by checkout.</p>
+            </div>
+
+            <div class="fields">
+                <div class="field-row">
+                    <label>
+                        Customer Id
+                        <input id="order-customer-id" type="text">
+                    </label>
+                    <label>
+                        Order Id
+                        <input id="order-id" type="text">
+                    </label>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="get-orders-by-customer">Get Customer Orders</button>
+                <button id="get-order" class="secondary">Get Order</button>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-header">
+                <h2>Logistics</h2>
+                <p>Inspect shipment state by order or shipment id.</p>
+            </div>
+
+            <div class="fields">
+                <div class="field-row">
+                    <label>
+                        Order Id
+                        <input id="logistics-order-id" type="text">
+                    </label>
+                    <label>
+                        Shipment Id
+                        <input id="shipment-id" type="text">
+                    </label>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="get-shipment-by-order">Get Shipment By Order</button>
+                <button id="get-shipment" class="secondary">Get Shipment</button>
+            </div>
+        </article>
+
+        <article class="panel" style="grid-column: 1 / -1;">
+            <div class="panel-header">
+                <h2>Scenario</h2>
+                <p>Run a quick sequence to produce telemetry with one click.</p>
+            </div>
+            <div class="actions">
+                <button id="run-scenario">Create Basket, Add Item, Checkout, Fetch Order, Fetch Shipment</button>
+                <button id="clear-output" class="ghost">Clear Output</button>
+            </div>
+            <div class="hint">Checkout can take a moment to propagate through messaging. The scenario waits briefly before loading order and logistics data.</div>
+        </article>
+
+        <article class="panel" style="grid-column: 1 / -1;">
+            <div class="panel-header">
+                <h2>Last Response</h2>
+                <p><span id="response-status" class="status">Idle</span></p>
+            </div>
+            <pre id="output">Ready.</pre>
+        </article>
+    </section>
+</main>
+
+<script>
+    const output = document.getElementById("output");
+    const responseStatus = document.getElementById("response-status");
+    const gatewayBase = window.location.origin;
+    document.getElementById("gateway-base").textContent = gatewayBase;
+
+    const state = {
+        customerId: crypto.randomUUID(),
+        basketId: "",
+        orderId: "",
+        shipmentId: ""
+    };
+
+    const productCatalog = [
+        { name: "Trail Mug", price: 19.99 },
+        { name: "Wool Throw", price: 49.50 },
+        { name: "Desk Lamp", price: 89.00 },
+        { name: "Travel Pack", price: 129.90 },
+        { name: "Field Notebook", price: 12.40 }
+    ];
+
+    const fields = {
+        customerId: document.getElementById("customer-id"),
+        basketId: document.getElementById("basket-id"),
+        productId: document.getElementById("product-id"),
+        productName: document.getElementById("product-name"),
+        quantity: document.getElementById("quantity"),
+        unitPrice: document.getElementById("unit-price"),
+        orderCustomerId: document.getElementById("order-customer-id"),
+        orderId: document.getElementById("order-id"),
+        logisticsOrderId: document.getElementById("logistics-order-id"),
+        shipmentId: document.getElementById("shipment-id")
+    };
+
+    function syncFields() {
+        fields.customerId.value = state.customerId;
+        fields.orderCustomerId.value = state.customerId;
+        fields.basketId.value = state.basketId;
+        fields.orderId.value = state.orderId;
+        fields.logisticsOrderId.value = state.orderId;
+        fields.shipmentId.value = state.shipmentId;
+
+        document.getElementById("customer-pill").textContent = truncate(state.customerId);
+        document.getElementById("basket-pill").textContent = state.basketId ? truncate(state.basketId) : "not set";
+        document.getElementById("order-pill").textContent = state.orderId ? truncate(state.orderId) : "not set";
+        document.getElementById("shipment-pill").textContent = state.shipmentId ? truncate(state.shipmentId) : "not set";
+    }
+
+    function truncate(value) {
+        return value ? `${value.slice(0, 8)}...` : "not set";
+    }
+
+    function randomItem() {
+        const item = productCatalog[Math.floor(Math.random() * productCatalog.length)];
+        fields.productId.value = crypto.randomUUID();
+        fields.productName.value = item.name;
+        fields.unitPrice.value = item.price.toFixed(2);
+        fields.quantity.value = "1";
+    }
+
+    function showResponse(label, statusClass, payload) {
+        responseStatus.textContent = label;
+        responseStatus.className = `status ${statusClass}`;
+        output.textContent = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+    }
+
+    async function request(method, path, body) {
+        const response = await fetch(`${gatewayBase}${path}`, {
+            method,
+            headers: body ? { "Content-Type": "application/json" } : {},
+            body: body ? JSON.stringify(body) : undefined
+        });
+
+        const text = await response.text();
+        let payload = text;
+
+        if (text) {
+            try {
+                payload = JSON.parse(text);
+            } catch {
+            }
+        }
+
+        if (!response.ok) {
+            showResponse(`${method} ${path} -> ${response.status}`, "error", payload || "Request failed.");
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        showResponse(`${method} ${path} -> ${response.status}`, "ok", payload || "No content");
+        return payload;
+    }
+
+    function updateFromBasket(basket) {
+        if (basket && basket.basketId) {
+            state.basketId = basket.basketId;
+        }
+        syncFields();
+    }
+
+    function updateOrderState(orders) {
+        if (Array.isArray(orders) && orders.length > 0) {
+            const newest = orders[0];
+            state.orderId = newest.orderId ?? newest.id ?? state.orderId;
+            syncFields();
+        }
+    }
+
+    function updateShipmentState(shipment) {
+        if (shipment) {
+            state.shipmentId = shipment.shipmentId ?? shipment.id ?? state.shipmentId;
+            syncFields();
+        }
+    }
+
+    async function createBasket() {
+        state.customerId = fields.customerId.value.trim();
+        syncFields();
+        const basket = await request("POST", "/basket/v1/baskets", {
+            customerId: state.customerId
+        });
+        updateFromBasket(basket);
+    }
+
+    async function getBasket() {
+        state.basketId = fields.basketId.value.trim();
+        syncFields();
+        const basket = await request("GET", `/basket/v1/baskets/${state.basketId}`);
+        updateFromBasket(basket);
+    }
+
+    async function upsertItem() {
+        state.basketId = fields.basketId.value.trim();
+        syncFields();
+        const basket = await request("PUT", `/basket/v1/baskets/${state.basketId}/items`, {
+            productId: fields.productId.value.trim(),
+            productName: fields.productName.value.trim(),
+            quantity: Number(fields.quantity.value),
+            unitPrice: Number(fields.unitPrice.value)
+        });
+        updateFromBasket(basket);
+    }
+
+    async function removeItem() {
+        state.basketId = fields.basketId.value.trim();
+        syncFields();
+        const basket = await request("DELETE", `/basket/v1/baskets/${state.basketId}/items/${fields.productId.value.trim()}`);
+        updateFromBasket(basket);
+    }
+
+    async function checkoutBasket() {
+        state.basketId = fields.basketId.value.trim();
+        syncFields();
+        const basket = await request("POST", `/basket/v1/baskets/${state.basketId}/checkout`);
+        updateFromBasket(basket);
+    }
+
+    async function getOrdersByCustomer() {
+        state.customerId = fields.orderCustomerId.value.trim();
+        syncFields();
+        const orders = await request("GET", `/orders/v1/orders/by-customer/${state.customerId}`);
+        updateOrderState(orders);
+    }
+
+    async function getOrder() {
+        state.orderId = fields.orderId.value.trim();
+        syncFields();
+        await request("GET", `/orders/v1/orders/${state.orderId}`);
+    }
+
+    async function getShipmentByOrder() {
+        state.orderId = fields.logisticsOrderId.value.trim();
+        syncFields();
+        const shipment = await request("GET", `/logistics/v1/shipments/by-order/${state.orderId}`);
+        updateShipmentState(shipment);
+    }
+
+    async function getShipment() {
+        state.shipmentId = fields.shipmentId.value.trim();
+        syncFields();
+        const shipment = await request("GET", `/logistics/v1/shipments/${state.shipmentId}`);
+        updateShipmentState(shipment);
+    }
+
+    async function runScenario() {
+        try {
+            showResponse("Running scenario", "ok", "Creating basket and driving basket -> order -> logistics flow...");
+            if (!fields.customerId.value.trim()) {
+                state.customerId = crypto.randomUUID();
+            } else {
+                state.customerId = fields.customerId.value.trim();
+            }
+
+            syncFields();
+            randomItem();
+
+            await createBasket();
+            await upsertItem();
+            await checkoutBasket();
+            await delay(1500);
+            await getOrdersByCustomer();
+            if (state.orderId) {
+                await getOrder();
+                await delay(1000);
+                await getShipmentByOrder();
+            }
+        } catch {
+        }
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    document.getElementById("generate-customer").addEventListener("click", () => {
+        state.customerId = crypto.randomUUID();
+        syncFields();
+    });
+    document.getElementById("generate-product").addEventListener("click", randomItem);
+    document.getElementById("create-basket").addEventListener("click", createBasket);
+    document.getElementById("get-basket").addEventListener("click", getBasket);
+    document.getElementById("upsert-item").addEventListener("click", upsertItem);
+    document.getElementById("remove-item").addEventListener("click", removeItem);
+    document.getElementById("checkout-basket").addEventListener("click", checkoutBasket);
+    document.getElementById("get-orders-by-customer").addEventListener("click", getOrdersByCustomer);
+    document.getElementById("get-order").addEventListener("click", getOrder);
+    document.getElementById("get-shipment-by-order").addEventListener("click", getShipmentByOrder);
+    document.getElementById("get-shipment").addEventListener("click", getShipment);
+    document.getElementById("run-scenario").addEventListener("click", runScenario);
+    document.getElementById("clear-output").addEventListener("click", () => showResponse("Idle", "", "Ready."));
+
+    randomItem();
+    syncFields();
+</script>
+</body>
+</html>
