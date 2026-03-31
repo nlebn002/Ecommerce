@@ -68,6 +68,46 @@ app.MapGet("/scalar-docs/order/{documentName}.json", async Task<IResult> (
 
     return Results.Text(root.ToJsonString(new JsonSerializerOptions(JsonSerializerDefaults.Web)), "application/json");
 });
+app.MapGet("/scalar-docs/logistics/{documentName}.json", async Task<IResult> (
+    string documentName,
+    IHttpClientFactory httpClientFactory,
+    CancellationToken cancellationToken) =>
+{
+    var client = httpClientFactory.CreateClient();
+    var response = await client.GetAsync($"https+http://logistics-api/openapi/{documentName}.json", cancellationToken);
+    if (!response.IsSuccessStatusCode)
+    {
+        return Results.StatusCode((int)response.StatusCode);
+    }
+
+    await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+    var document = await JsonNode.ParseAsync(responseStream, cancellationToken: cancellationToken);
+    if (document is not JsonObject root)
+    {
+        return Results.Problem("Logistics OpenAPI document was not valid JSON.");
+    }
+
+    if (root["paths"] is JsonObject paths)
+    {
+        var rewrittenPaths = new JsonObject();
+        foreach (var path in paths)
+        {
+            var rewrittenPath = path.Key.StartsWith("/api/", StringComparison.Ordinal)
+                ? $"/logistics/{path.Key["/api/".Length..]}"
+                : path.Key;
+            rewrittenPaths[rewrittenPath] = path.Value?.DeepClone();
+        }
+
+        root["paths"] = rewrittenPaths;
+    }
+
+    root["servers"] = new JsonArray(new JsonObject
+    {
+        ["url"] = "/"
+    });
+
+    return Results.Text(root.ToJsonString(new JsonSerializerOptions(JsonSerializerDefaults.Web)), "application/json");
+});
 app.MapGet("/scalar-docs/basket/{documentName}.json", async Task<IResult> (
     string documentName,
     IHttpClientFactory httpClientFactory,
@@ -114,6 +154,7 @@ app.MapScalarApiReference("/scalar", options =>
     options.AddDocument("gateway", "Gateway API", "/openapi/v1.json");
     options.AddDocument("basket-api", "Basket API", "/scalar-docs/basket/v1.json", true);
     options.AddDocument("order-api", "Order API", "/scalar-docs/order/v1.json", true);
+    options.AddDocument("logistics-api", "Logistics API", "/scalar-docs/logistics/v1.json", true);
 });
 app.MapGet("/", () => Results.Ok(new { service = "gateway", status = "ok" }));
 app.MapReverseProxy().RequireRateLimiting("gateway");

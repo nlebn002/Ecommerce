@@ -7,6 +7,7 @@
   <Folder Name="/src/" />
   <Folder Name="/scripts/">
     <File Path="scripts/add-basket-migration.ps1" />
+    <File Path="scripts/add-logistics-migration.ps1" />
     <File Path="scripts/add-order-migration.ps1" />
     <File Path="scripts/seed-basket-dev.ps1" />
   </Folder>
@@ -30,6 +31,12 @@
     <Project Path="src/Services/Order/Ecommerce.OrderService.Domain/Ecommerce.OrderService.Domain.csproj" />
     <Project Path="src/Services/Order/Ecommerce.OrderService.Infrastructure/Ecommerce.OrderService.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Services/Logistics/">
+    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Api/Ecommerce.LogisticsService.Api.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Application/Ecommerce.LogisticsService.Application.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Domain/Ecommerce.LogisticsService.Domain.csproj" />
+    <Project Path="src/Services/Logistics/Ecommerce.LogisticsService.Infrastructure/Ecommerce.LogisticsService.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/SharedKernel/">
     <Project Path="src/SharedKernel/Ecommerce.Common/Ecommerce.Common.csproj" />
     <Project Path="src/SharedKernel/Ecommerce.Contracts/Ecommerce.Contracts.csproj" />
@@ -46,5 +53,11 @@
     <Project Path="tests/Services/Order/Ecommerce.OrderService.Application.Tests/Ecommerce.OrderService.Application.Tests.csproj" />
     <Project Path="tests/Services/Order/Ecommerce.OrderService.Domain.Tests/Ecommerce.OrderService.Domain.Tests.csproj" />
     <Project Path="tests/Services/Order/Ecommerce.OrderService.Infrastructure.Tests/Ecommerce.OrderService.Infrastructure.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Services/Logistics/">
+    <Project Path="tests/Services/Logistics/Ecommerce.LogisticsService.Api.Tests/Ecommerce.LogisticsService.Api.Tests.csproj" />
+    <Project Path="tests/Services/Logistics/Ecommerce.LogisticsService.Application.Tests/Ecommerce.LogisticsService.Application.Tests.csproj" />
+    <Project Path="tests/Services/Logistics/Ecommerce.LogisticsService.Domain.Tests/Ecommerce.LogisticsService.Domain.Tests.csproj" />
+    <Project Path="tests/Services/Logistics/Ecommerce.LogisticsService.Infrastructure.Tests/Ecommerce.LogisticsService.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>

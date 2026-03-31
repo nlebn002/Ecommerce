@@ -9,6 +9,7 @@ var postgres = builder.AddPostgres("postgres", postgresUserName, postgresPasswor
 
 var basketDb = postgres.AddDatabase("BasketDb", "basketdb");
 var orderDb = postgres.AddDatabase("OrderDb", "orderdb");
+var logisticsDb = postgres.AddDatabase("LogisticsDb", "logisticsdb");
 
 var redis = builder.AddRedis("Redis");
 var messageBroker = builder.AddRabbitMQ("MessageBroker");
@@ -27,9 +28,16 @@ var orderApi = builder.AddProject<Projects.Ecommerce_OrderService_Api>("order-ap
     .WaitFor(orderDb)
     .WaitFor(messageBroker);
 
+var logisticsApi = builder.AddProject<Projects.Ecommerce_LogisticsService_Api>("logistics-api")
+    .WithReference(logisticsDb)
+    .WithReference(messageBroker)
+    .WaitFor(logisticsDb)
+    .WaitFor(messageBroker);
+
 builder.AddProject<Projects.Ecommerce_Gateway>("gateway")
     .WithReference(basketApi)
     .WithReference(orderApi)
+    .WithReference(logisticsApi)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
