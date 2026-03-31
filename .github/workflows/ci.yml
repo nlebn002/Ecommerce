@@ -18,10 +18,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Ecommerce.sln
+        run: dotnet restore Ecommerce.slnx
 
       - name: Build
-        run: dotnet build Ecommerce.sln --configuration Release --no-restore
+        run: dotnet build Ecommerce.slnx --configuration Release --no-restore
 
       - name: Validate Docker Compose
         run: docker compose config
