@@ -38,6 +38,36 @@ services:
       - rabbitmq
       - redis
 
+  order-api:
+    build:
+      context: .
+      dockerfile: src/Services/Order/Ecommerce.OrderService.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Compose
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__OrderDb: Host=postgres;Port=5432;Database=orderdb;Username=ecommerce;Password=ecommerce
+      ConnectionStrings__MessageBroker: rabbitmq://guest:guest@rabbitmq:5672
+    ports:
+      - "5030:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  logistics-api:
+    build:
+      context: .
+      dockerfile: src/Services/Logistics/Ecommerce.LogisticsService.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Compose
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__LogisticsDb: Host=postgres;Port=5432;Database=logisticsdb;Username=ecommerce;Password=ecommerce
+      ConnectionStrings__MessageBroker: rabbitmq://guest:guest@rabbitmq:5672
+    ports:
+      - "5040:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+
   gateway:
     build:
       context: .
@@ -49,6 +79,8 @@ services:
       - "5010:8080"
     depends_on:
       - basket-api
+      - order-api
+      - logistics-api
 
   prometheus:
     image: prom/prometheus
