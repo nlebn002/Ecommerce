@@ -29,9 +29,6 @@ var logisticsApi = builder.AddProject<Projects.Ecommerce_LogisticsService_Api>("
     .WaitFor(logisticsDb)
     .WaitFor(messageBroker);
 
-builder.AddJavaScriptApp("console-ui", "../../Gateway/Ecommerce.Gateway/ClientApp", "start")
-    .WithNpm();
-
 builder.AddProject<Projects.Ecommerce_Gateway>("gateway")
     .WithReference(basketApi)
     .WithReference(orderApi)
