@@ -18,7 +18,6 @@
     <File Path="scripts/add-basket-migration.ps1" />
     <File Path="scripts/add-logistics-migration.ps1" />
     <File Path="scripts/add-order-migration.ps1" />
-    <File Path="scripts/seed-basket-dev.ps1" />
   </Folder>
   <Folder Name="/src/Gateway/">
     <Project Path="src/Gateway/Ecommerce.Gateway/Ecommerce.Gateway.csproj" />
