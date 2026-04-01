@@ -5,3 +5,8 @@
  # docker compose ephemeral
  docker compose -f docker-compose-ephemeral.yml up -d --build
  docker compose -f docker-compose-ephemeral.yml down -v
+
+ # docker compose light
+ docker compose -f  docker-compose-light.yml up -d --build
+ docker compose -f  docker-compose-light.yml down -v
+
