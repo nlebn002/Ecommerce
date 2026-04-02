@@ -10,15 +10,10 @@ const productCatalog = [
 ];
 
 const navItems = [
-    { id: "dashboard", label: "Dashboard", description: "Quick scenario and telemetry links." },
     { id: "basket", label: "Basket Flow", description: "Create baskets and manage line items." },
     { id: "orders", label: "Orders", description: "Inspect orders after checkout." },
     { id: "logistics", label: "Logistics", description: "Inspect shipment state." }
 ];
-
-function shortId(value) {
-    return value ? `${value.slice(0, 8)}...` : "not set";
-}
 
 function randomItem() {
     const item = productCatalog[Math.floor(Math.random() * productCatalog.length)];
@@ -34,8 +29,16 @@ function formatPayload(payload) {
     return typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
 }
 
+function ActionButton({ className = "", onClick, children }) {
+    return (
+        <button type="button" className={className} onClick={() => void onClick()}>
+            {children}
+        </button>
+    );
+}
+
 function App() {
-    const [activeTab, setActiveTab] = useState("dashboard");
+    const [activeTab, setActiveTab] = useState("basket");
     const [customerId, setCustomerId] = useState(crypto.randomUUID());
     const [basketId, setBasketId] = useState("");
     const [orderId, setOrderId] = useState("");
@@ -58,6 +61,19 @@ function App() {
 
     function pushHistory(entry) {
         setHistory(current => [entry, ...current].slice(0, 20));
+    }
+
+    async function runAction(label, action) {
+        try {
+            await action();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setResponse({
+                label,
+                status: "error",
+                payload: message
+            });
+        }
     }
 
     async function apiRequest(method, path, body) {
@@ -165,50 +181,6 @@ function App() {
         updateFromShipment(shipment);
     }
 
-    async function runScenario() {
-        try {
-            const freshCustomer = crypto.randomUUID();
-            setCustomerId(freshCustomer);
-            setOrderId("");
-            setShipmentId("");
-            const nextItem = randomItem();
-            setBasketForm(nextItem);
-
-            const basket = await apiRequest("POST", "/basket/v1/baskets", { customerId: freshCustomer });
-            const nextBasketId = basket?.basketId ?? "";
-            setBasketId(nextBasketId);
-
-            await apiRequest("PUT", `/basket/v1/baskets/${nextBasketId}/items`, {
-                productId: nextItem.productId,
-                productName: nextItem.productName,
-                quantity: Number(nextItem.quantity),
-                unitPrice: Number(nextItem.unitPrice)
-            });
-
-            await apiRequest("POST", `/basket/v1/baskets/${nextBasketId}/checkout`);
-            await delay(1500);
-
-            const orders = await apiRequest("GET", `/orders/v1/orders/by-customer/${freshCustomer}`);
-            const nextOrderId = Array.isArray(orders) && orders.length > 0
-                ? (orders[0].orderId ?? orders[0].id ?? "")
-                : "";
-            setOrderId(nextOrderId);
-
-            if (nextOrderId) {
-                await apiRequest("GET", `/orders/v1/orders/${nextOrderId}`);
-                await delay(1000);
-                const shipment = await apiRequest("GET", `/logistics/v1/shipments/by-order/${nextOrderId}`);
-                setShipmentId(shipment?.shipmentId ?? shipment?.id ?? "");
-            }
-        } catch {
-        }
-    }
-
-    function clearOutput() {
-        setResponse({ label: "Idle", status: "", payload: "Ready." });
-        setHistory([]);
-    }
-
     function regenerateCustomer() {
         setCustomerId(crypto.randomUUID());
     }
@@ -228,19 +200,17 @@ function App() {
         setShipmentId,
         basketForm,
         setBasketForm,
-        createBasket,
-        getBasket,
-        upsertItem,
-        removeItem,
-        checkoutBasket,
-        getOrdersByCustomer,
-        getOrder,
-        getShipmentByOrder,
-        getShipment,
-        regenerateCustomer,
-        regenerateItem,
-        runScenario,
-        clearOutput
+        createBasket: () => runAction("Create Basket", createBasket),
+        getBasket: () => runAction("Get Basket", getBasket),
+        upsertItem: () => runAction("Add Or Update Item", upsertItem),
+        removeItem: () => runAction("Remove Item", removeItem),
+        checkoutBasket: () => runAction("Checkout", checkoutBasket),
+        getOrdersByCustomer: () => runAction("Get Customer Orders", getOrdersByCustomer),
+        getOrder: () => runAction("Get Order", getOrder),
+        getShipmentByOrder: () => runAction("Get Shipment By Order", getShipmentByOrder),
+        getShipment: () => runAction("Get Shipment", getShipment),
+        regenerateCustomer: () => runAction("New Customer", async () => regenerateCustomer()),
+        regenerateItem: () => runAction("Random Item", async () => regenerateItem())
     };
 
     return (
@@ -263,6 +233,7 @@ function App() {
                 <nav className="nav">
                     {navItems.map(item => (
                         <button
+                            type="button"
                             key={item.id}
                             className={activeTab === item.id ? "active" : ""}
                             onClick={() => setActiveTab(item.id)}>
@@ -286,7 +257,6 @@ function App() {
                     </div>
                 </header>
 
-                {activeTab === "dashboard" && <DashboardScreen {...screenProps} />}
                 {activeTab === "basket" && <BasketScreen {...screenProps} />}
                 {activeTab === "orders" && <OrderScreen {...screenProps} />}
                 {activeTab === "logistics" && <LogisticsScreen {...screenProps} />}
@@ -326,53 +296,6 @@ function App() {
     );
 }
 
-function DashboardScreen(props) {
-    return (
-        <section className="panel-grid">
-            <div className="content-card span-7">
-                <div className="section-head">
-                    <h3>Quick Flow</h3>
-                    <p>Drive basket to order to shipment without leaving the page.</p>
-                </div>
-                <div className="scenario-actions">
-                    <button onClick={props.runScenario}>Run Full Scenario</button>
-                    <button className="secondary" onClick={props.regenerateCustomer}>New Customer</button>
-                    <button className="secondary" onClick={props.regenerateItem}>New Random Item</button>
-                    <button className="ghost" onClick={props.clearOutput}>Clear Output</button>
-                </div>
-                <p className="hint" style={{ marginTop: "14px" }}>
-                    This is the fastest way to generate useful traces and metrics across gateway, basket, order, and logistics.
-                </p>
-            </div>
-
-            <div className="content-card span-5">
-                <div className="section-head">
-                    <h3>Current Pointers</h3>
-                    <p>Use these ids to jump into the other tabs.</p>
-                </div>
-                <div className="summary-stack">
-                    <div className="summary-card">
-                        <span className="summary-label">Customer</span>
-                        <span className="summary-value">{shortId(props.customerId)}</span>
-                    </div>
-                    <div className="summary-card">
-                        <span className="summary-label">Basket</span>
-                        <span className="summary-value">{shortId(props.basketId)}</span>
-                    </div>
-                    <div className="summary-card">
-                        <span className="summary-label">Order</span>
-                        <span className="summary-value">{shortId(props.orderId)}</span>
-                    </div>
-                    <div className="summary-card">
-                        <span className="summary-label">Shipment</span>
-                        <span className="summary-value">{shortId(props.shipmentId)}</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
-
 function BasketScreen(props) {
     return (
         <section className="panel-grid">
@@ -390,13 +313,13 @@ function BasketScreen(props) {
                     <Field label="Unit Price" value={props.basketForm.unitPrice} onChange={value => props.setBasketForm({ ...props.basketForm, unitPrice: value })} type="number" />
                 </div>
                 <div className="action-row">
-                    <button onClick={props.regenerateCustomer}>New Customer</button>
-                    <button className="secondary" onClick={props.regenerateItem}>Random Item</button>
-                    <button onClick={props.createBasket}>Create Basket</button>
-                    <button className="secondary" onClick={props.getBasket}>Get Basket</button>
-                    <button onClick={props.upsertItem}>Add Or Update Item</button>
-                    <button className="secondary" onClick={props.removeItem}>Remove Item</button>
-                    <button onClick={props.checkoutBasket}>Checkout</button>
+                    <ActionButton className="frontend-action" onClick={props.regenerateCustomer}>New Customer</ActionButton>
+                    <ActionButton className="frontend-action" onClick={props.regenerateItem}>Random Item</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.createBasket}>Create Basket</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.getBasket}>Get Basket</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.upsertItem}>Add Or Update Item</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.removeItem}>Remove Item</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.checkoutBasket}>Checkout</ActionButton>
                 </div>
             </div>
 
@@ -434,8 +357,8 @@ function OrderScreen(props) {
                     <Field label="Order Id" value={props.orderId} onChange={value => props.setOrderId(value)} />
                 </div>
                 <div className="action-row">
-                    <button onClick={props.getOrdersByCustomer}>Get Customer Orders</button>
-                    <button className="secondary" onClick={props.getOrder}>Get Order</button>
+                    <ActionButton className="backend-action" onClick={props.getOrdersByCustomer}>Get Customer Orders</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.getOrder}>Get Order</ActionButton>
                 </div>
             </div>
 
@@ -465,8 +388,8 @@ function LogisticsScreen(props) {
                     <Field label="Shipment Id" value={props.shipmentId} onChange={value => props.setShipmentId(value)} />
                 </div>
                 <div className="action-row">
-                    <button onClick={props.getShipmentByOrder}>Get Shipment By Order</button>
-                    <button className="secondary" onClick={props.getShipment}>Get Shipment</button>
+                    <ActionButton className="backend-action" onClick={props.getShipmentByOrder}>Get Shipment By Order</ActionButton>
+                    <ActionButton className="backend-action" onClick={props.getShipment}>Get Shipment</ActionButton>
                 </div>
             </div>
 
@@ -490,10 +413,6 @@ function Field({ label, value, onChange, type = "text" }) {
             <input type={type} value={value} onChange={event => onChange(event.target.value)} />
         </div>
     );
-}
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 ReactDOM.createRoot(document.getElementById("app")).render(<App />);

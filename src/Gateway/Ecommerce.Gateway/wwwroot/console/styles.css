@@ -228,31 +228,26 @@ select {
     margin-top: 16px;
 }
 
-.action-row button,
-.scenario-actions button {
+.action-row button {
     border: 0;
     border-radius: 999px;
     padding: 10px 14px;
     cursor: pointer;
+}
+
+.action-row button.backend-action {
     background: var(--accent);
     color: #fff;
 }
 
-.action-row button.secondary,
-.scenario-actions button.secondary {
+.action-row button.frontend-action {
     background: #6d7781;
+    color: #fff;
 }
 
-.action-row button.ghost,
-.scenario-actions button.ghost {
+.action-row button.ghost {
     background: #e9dfd1;
     color: var(--ink);
-}
-
-.scenario-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 .status-pill {
