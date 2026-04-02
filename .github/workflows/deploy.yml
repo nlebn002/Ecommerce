@@ -3,15 +3,20 @@ name: deploy
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: Environment to deploy to
+        type: environment
+        required: true
       branch:
         description: Branch to deploy
         required: true
         default: master
+        type: string
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment }}
     steps:
       - name: Configure SSH
         run: |
@@ -22,7 +27,7 @@ jobs:
 
       - name: Deploy
         env:
-          DEPLOY_BRANCH: ${{ github.event.inputs.branch }}
+          DEPLOY_BRANCH: ${{ inputs.branch }}
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" "
             set -euo pipefail
